@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NGA — Artwork Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #111;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Gradient blob animations ── */
+    @keyframes blob1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(60px,-40px) scale(1.12)} 66%{transform:translate(-30px,50px) scale(0.92)} }
+    @keyframes blob2 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(-70px,30px) scale(0.9)} 66%{transform:translate(40px,-60px) scale(1.08)} }
+    @keyframes blob3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(50px,40px) scale(1.06)} }
+    @keyframes blob4 { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(-40px,-50px) scale(0.94)} 80%{transform:translate(30px,20px) scale(1.04)} }
+    @keyframes blob5 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-60px,60px) scale(1.1)} }
+
+    @keyframes tooltipFadeIn {
+      from { opacity: 0; transform: translateY(4px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes screenFadeIn  { from { opacity:0; transform:scale(1.015); } to { opacity:1; transform:scale(1); } }
+    @keyframes screenFadeOut { from { opacity:1; transform:scale(1); } to { opacity:0; transform:scale(0.985); } }
+    @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes labelSlideIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── Range slider (canvas) ── */
+    input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:16px; background:transparent; outline:none; cursor:pointer; }
+    input[type=range]::-webkit-slider-runnable-track {
+      height:16px; border-radius:999px;
+      background:linear-gradient(to right,#030213 var(--pct),#ececf0 var(--pct));
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance:none; width:16px; height:16px; border-radius:999px;
+      background:#fff; border:1px solid #030213;
+      box-shadow:0 1px 3px rgba(0,0,0,0.15),0 1px 2px rgba(0,0,0,0.1);
+      transition:transform 0.15s ease,box-shadow 0.15s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.2); box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+
+    .btn {
+      display:flex; align-items:center; justify-content:center;
+      width:40px; height:40px;
+      background:#fff; border:1px solid #d1d5dc; border-radius:10px;
+      box-shadow:0 1px 3px rgba(0,0,0,0.1),0 1px 2px rgba(0,0,0,0.1);
+      cursor:pointer; transition:background 0.15s,transform 0.1s,box-shadow 0.15s;
+      user-select:none; flex-shrink:0;
+    }
+    .btn:hover  { background:#f9fafb; box-shadow:0 4px 6px rgba(0,0,0,0.08); }
+    .btn:active { transform:scale(0.92); background:#f3f4f6; }
+
+    .canvas-root { position:relative; overflow:hidden; background:linear-gradient(151.5deg,#f9fafb 0%,#f3f4f6 100%); }
+    .canvas-inner { position:absolute; inset:0; will-change:transform; }
+    .dot-grid {
+      position:absolute; inset:-50%;
+      background-image:radial-gradient(circle,#d1d5dc 1px,transparent 1px);
+      background-size:32px 32px; opacity:0.35; pointer-events:none;
+    }
+    .axis-label {
+      position:absolute; font-family:'Inter',sans-serif; font-weight:300;
+      font-size:12px; letter-spacing:0.3px; color:#99a1af;
+      pointer-events:none; user-select:none;
+    }
+    .artwork-node {
+      position:absolute; transform:translate(-50%,-50%);
+      border-radius:4px; overflow:hidden; cursor:pointer;
+      will-change:transform,left,top,opacity,width,height;
+    }
+    .artwork-node img { display:block; width:100%; height:100%; object-fit:cover; border-radius:4px; pointer-events:none; }
+
+    .tooltip {
+      position:fixed; background:#fff; border:1px solid #e5e7eb; border-radius:12px;
+      padding:12px 14px; width:210px; pointer-events:none; z-index:9999;
+      box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.06);
+      animation:tooltipFadeIn 0.18s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .tooltip-img   { width:100%; height:110px; object-fit:cover; border-radius:6px; margin-bottom:10px; display:block; }
+    .tooltip-title { font-size:13px; font-weight:500; color:#111827; line-height:1.3; margin-bottom:3px; }
+    .tooltip-artist{ font-size:11px; font-weight:400; color:#6a7282; margin-bottom:1px; }
+    .tooltip-meta  { font-size:11px; font-weight:300; color:#99a1af; }
+    .tooltip-tags  { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
+    .tooltip-tag   { font-size:10px; font-weight:400; color:#6a7282; background:#f3f4f6; border-radius:999px; padding:2px 7px; }
+
+    .search-input {
+      width:620px; height:46px; padding:12px 16px 12px 48px;
+      font-family:'Inter',sans-serif; font-size:14px; font-weight:400; color:#0a0a0a;
+      background:#fff; border:1px solid #d1d5dc; border-radius:10px; outline:none;
+      letter-spacing:-0.015em; transition:border-color 0.2s,box-shadow 0.2s;
+    }
+    .search-input::placeholder { color:rgba(10,10,10,0.5); }
+    .search-input:focus { border-color:#030213; box-shadow:0 0 0 3px rgba(3,2,19,0.08); }
+
+    .zoom-pct {
+      font-family:'Inter',sans-serif; font-size:10px; font-weight:500;
+      color:#6a7282; letter-spacing:0.1px; text-align:center; margin-bottom:4px;
+    }
+
+    /* ── Landing screen ── */
+    .landing-screen {
+      position:fixed; inset:0; z-index:100; overflow:hidden;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .landing-bg {
+      position:absolute; inset:0; background:#111;
+      transition:background 2s ease;
+    }
+    .blob {
+      position:absolute; border-radius:50%;
+      transition:background 2s ease, opacity 1.5s ease, width 2s ease, height 2s ease, filter 2s ease;
+      pointer-events:none;
+    }
+    .landing-content {
+      position:relative; z-index:2;
+      display:flex; flex-direction:column; align-items:center;
+      gap:0;
+    }
+    .landing-eyebrow {
+      font-size:16px; font-weight:300; letter-spacing:0.2px;
+      color:rgba(255,255,255,0.45);
+      margin-bottom:10px;
+      animation:labelSlideIn 0.7s ease both;
+    }
+    .show-me-row {
+      display:flex; align-items:baseline; justify-content:center; gap:10px;
+      font-size:32px; font-weight:500; letter-spacing:-0.04em;
+      animation:labelSlideIn 0.7s 0.08s ease both;
+      width:100%; max-width:800px;
+    }
+    .show-me-static { color:rgba(255,255,255,0.4); white-space:nowrap; flex-shrink:0; }
+    /* CSS grid trick: ::after mirrors the value to size the cell;
+       input sits in the same cell and fills it — the row stays centred
+       because the wrap never has a fixed width. */
+    .show-me-input-wrap {
+      display:inline-grid; align-items:baseline;
+      min-width:220px;
+    }
+    .show-me-input-wrap::after {
+      content: attr(data-value) '\00a0'; /* \00a0 = nbsp as cursor buffer */
+      white-space:pre;
+      visibility:hidden;
+      font:inherit;
+      letter-spacing:inherit;
+      grid-area:1/1;
+      padding-right:6px;
+    }
+    .show-me-input {
+      grid-area:1/1;
+      min-width:0; width:100%;
+      background:transparent; border:none; outline:none;
+      font:inherit; letter-spacing:inherit;
+      color:#fff;
+      caret-color:transparent;
+    }
+    .show-me-input::placeholder { color:rgba(255,255,255,0.4); }
+    .show-me-cursor {
+      display:inline-block; width:2px; height:1em;
+      background:rgba(255,255,255,0.7); margin-left:2px; border-radius:1px;
+      animation:cursorBlink 1.1s ease infinite;
+      flex-shrink:0; align-self:center; vertical-align:middle;
+    }
+
+    /* tick slider */
+    .tick-slider-wrap {
+      position:relative; margin-top:120px;
+      animation:labelSlideIn 0.7s 0.18s ease both;
+    }
+    .tick-bubble {
+      position:absolute; top:-30px;
+      background:rgba(0,0,0,0.4); border-radius:999px;
+      padding:4px 10px; font-size:11px; font-weight:400;
+      color:rgba(255,255,255,0.9); letter-spacing:-0.02em;
+      transform:translateX(-50%);
+      transition:left 0.15s ease;
+      white-space:nowrap;
+      pointer-events:none;
+    }
+    .tick-track {
+      width:600px; height:15px; position:relative; cursor:pointer;
+    }
+    .tick-labels {
+      display:flex; justify-content:space-between;
+      font-size:11px; font-weight:500; color:rgba(255,255,255,0.5);
+      letter-spacing:-0.01em; margin-top:8px;
+    }
+    .find-btn {
+      margin-top:32px;
+      display:flex; align-items:center; gap:2px;
+      background:#fff; border:none; border-radius:999px;
+      padding:8px 16px 8px 14px;
+      font-family:'Inter',sans-serif; font-size:15px; font-weight:500;
+      letter-spacing:-0.02em; color:#000; cursor:pointer;
+      box-shadow:0 2px 12px rgba(0,0,0,0.3);
+      transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.18s ease;
+      animation:labelSlideIn 0.7s 0.26s ease both;
+    }
+    .find-btn:hover  { transform:scale(1.05); box-shadow:0 4px 20px rgba(0,0,0,0.4); }
+    .find-btn:active { transform:scale(0.97); }
+    .find-btn svg    { margin-left:2px; }
+
+    .screen-leave { animation:screenFadeOut 0.4s cubic-bezier(0.4,0,1,1) both; }
+    .screen-enter { animation:screenFadeIn  0.5s 0.2s cubic-bezier(0,0,0.2,1) both; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useRef, useCallback, useEffect, useMemo } = React;
+
+// ─── Assets ───────────────────────────────────────────────────────────────────
+const IMGS = {
+  aw0:"https://www.figma.com/api/mcp/asset/eff3d0b6-006d-4dc8-9c05-d070a1e87efe",
+  aw1:"https://www.figma.com/api/mcp/asset/360652c9-f5e1-4157-bd01-1600ab95c37d",
+  aw2:"https://www.figma.com/api/mcp/asset/3b14fc5e-02c6-46e2-b391-b3b4071bf0db",
+  aw3:"https://www.figma.com/api/mcp/asset/a35c9ee8-67ee-4ef9-9859-bb93419123f7",
+  aw4:"https://www.figma.com/api/mcp/asset/5ccf20c8-a19e-4d17-8f2e-e8b6ef8fc9ea",
+  aw5:"https://www.figma.com/api/mcp/asset/1a4e65c4-d3c0-4985-baa9-71908f32dff3",
+  aw6:"https://www.figma.com/api/mcp/asset/f77e5256-c1a8-493b-89c7-fe5dd62a9cb5",
+  aw7:"https://www.figma.com/api/mcp/asset/61f379c7-f920-4f06-bef8-1804f38c0945",
+  aw8:"https://www.figma.com/api/mcp/asset/35f0abaf-b2d8-4704-be50-49475fa33ec8",
+  aw9:"https://www.figma.com/api/mcp/asset/93b3272b-d945-4853-9a20-d9a4c7c06fcc",
+  aw10:"https://www.figma.com/api/mcp/asset/0c328e10-ec2e-4cce-aaf1-84aff9e586c2",
+  aw11:"https://www.figma.com/api/mcp/asset/7553f8d3-f36b-40d9-9b0a-aeccc93b255d",
+  iconSearch:"https://www.figma.com/api/mcp/asset/3f411d51-5e47-4605-8e60-7785485bc8a5",
+  iconColorPicker:"https://www.figma.com/api/mcp/asset/3750c07f-8c8f-42d4-9f8c-f67b17db7dad",
+  iconZoomIn:"https://www.figma.com/api/mcp/asset/90965c47-9f2f-4edc-b1f8-488a2a8a673f",
+  iconZoomOut:"https://www.figma.com/api/mcp/asset/8f84cb02-f47f-4a62-b84b-bbfacb22bb6e",
+};
+
+// ─── Gradient colour palettes keyed to search intent ─────────────────────────
+const PALETTES = [
+  { keys:['vibrant','bright','colorful','lively','energy','fire','sunset','bold','alive','electric','joyful'],
+    blobs:['#c0392b','#8e0a37','#e65100','#b03a2e'],   base:'#1a0208' },
+  { keys:['lonely','alone','quiet','still','grey','gray','fog','mist','cold','silence','empty','solitude'],
+    blobs:['#263238','#37474f','#1565c0','#0d1b2a'],   base:'#0a0e12' },
+  { keys:['flowers','bloom','blossom','spring','rose','petal','garden','pink','floral','cherry'],
+    blobs:['#c2185b','#7b1fa2','#e91e63','#9c27b0'],   base:'#130820' },
+  { keys:['memory','nostalgia','past','vintage','amber','golden','dusk','twilight','time','childhood'],
+    blobs:['#e65100','#bf360c','#6d4c41','#4e342e'],   base:'#1a0e00' },
+  { keys:['nature','forest','tree','green','leaf','grass','earth','wild','organic','verdant'],
+    blobs:['#1b5e20','#2e7d32','#004d40','#1a237e'],   base:'#000f05' },
+  { keys:['mystery','dark','night','shadow','dream','surreal','strange','eerie','otherworldly'],
+    blobs:['#1a0533','#0d0d2b','#0f3460','#2c003e'],   base:'#05000d' },
+  { keys:['ocean','sea','water','wave','blue','calm','serene','drift','fluid','deep'],
+    blobs:['#006064','#01579b','#00838f','#0277bd'],   base:'#000e1a' },
+  { keys:['gold','rich','luxury','opulent','gleam','gilded','crown','majestic','regal'],
+    blobs:['#f9a825','#f57f17','#e65100','#827717'],   base:'#120a00' },
+];
+
+const NEUTRAL_BLOBS   = ['#1e1e2e','#16213e','#0f3460','#1a1a2e'];
+const NEUTRAL_BASE    = '#111';
+
+function getPalette(query) {
+  if (!query.trim()) return null;
+  const q = query.toLowerCase();
+  for (const p of PALETTES) {
+    if (p.keys.some(k => q.includes(k))) return p;
+  }
+  // fallback: any query gets a soft desaturated tint so it still reacts
+  return { blobs:['#1e2a3a','#2a1e3a','#1e3a2a','#3a2a1e'], base:'#0e1217' };
+}
+
+// ─── Tick slider component ────────────────────────────────────────────────────
+const TICK_COUNT = 40;
+function TickSlider({ value, onChange }) {
+  const trackRef = useRef(null);
+  const dragging = useRef(false);
+
+  // Tick heights: taller at edges, with slight random variation for organic look
+  const ticks = useMemo(() => Array.from({ length: TICK_COUNT }, (_, i) => {
+    const norm = i / (TICK_COUNT - 1); // 0 → 1
+    const edge = Math.min(norm, 1 - norm) * 2; // 0 at edges, 1 at center
+    const base = 15 - edge * 8;  // 15px at edges, ~7px at center
+    const jitter = Math.sin(i * 2.1 + 0.7) * 2;
+    return Math.max(5, Math.round(base + jitter));
+  }), []);
+
+  const getValueFromX = (clientX) => {
+    const rect = trackRef.current.getBoundingClientRect();
+    const raw = (clientX - rect.left) / rect.width;
+    return Math.max(0, Math.min(1, raw));
+  };
+
+  const onPointerDown = (e) => {
+    dragging.current = true;
+    trackRef.current.setPointerCapture(e.pointerId);
+    onChange(getValueFromX(e.clientX));
+  };
+  const onPointerMove = (e) => { if (dragging.current) onChange(getValueFromX(e.clientX)); };
+  const onPointerUp   = () => { dragging.current = false; };
+
+  const bubbleLeft = `${value * 100}%`;
+  const displayVal = Math.round(value * 100);
+
+  return (
+    <div className="tick-slider-wrap">
+      {/* Floating value bubble */}
+      <div className="tick-bubble" style={{ left: bubbleLeft }}>{displayVal}</div>
+
+      {/* Tick track */}
+      <div ref={trackRef} className="tick-track"
+        onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
+      >
+        <svg width="600" height="15" viewBox="0 0 600 15" overflow="visible">
+          {ticks.map((h, i) => {
+            const x   = (i / (TICK_COUNT - 1)) * 600;
+            const lit = i / (TICK_COUNT - 1) <= value;
+            return (
+              <rect key={i} x={x} y={(15 - h) / 2} width="1.5" height={h}
+                rx="1"
+                fill={lit ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)'}
+                style={{ transition:'fill 0.12s ease' }}
+              />
+            );
+          })}
+        </svg>
+      </div>
+
+      <div className="tick-labels">
+        <span>more focused</span>
+        <span>more exploratory</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Landing Screen ───────────────────────────────────────────────────────────
+const PLACEHOLDERS = [
+  'something vibrant...',
+  'a feeling of longing...',
+  'flowers in summer...',
+  'a stormy sea...',
+  'quiet solitude...',
+  'something golden...',
+];
+
+function LandingScreen({ onFind, initQuery, initTemperature, onQueryChange, onTempChange }) {
+  const [query, setQuery]           = useState(initQuery || '');
+  const [temperature, setTemperature] = useState(initTemperature ?? 0.05);
+  const [phIndex, setPhIndex]       = useState(0);
+  const [leaving, setLeaving]       = useState(false);
+  const inputRef                    = useRef(null);
+
+  // Rotate placeholder
+  useEffect(() => {
+    const id = setInterval(() => setPhIndex(i => (i + 1) % PLACEHOLDERS.length), 3200);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  const palette = getPalette(query);
+  // Quadratic ease-in: zero at low temp, fully vivid at high temp
+  const intensity = Math.pow(temperature, 0.75);
+  // Blobs shrink to near-nothing at low temp, bloom to full size at high temp
+  const blobScale = 0.15 + temperature * 0.85;
+  // Less blur at high temperature = colours read as vivid rather than hazy
+  const blobBlur  = Math.round(110 - temperature * 55);
+
+  // Blob colours: resolved from palette * intensity
+  const blobs = palette ? palette.blobs : NEUTRAL_BLOBS;
+  // Base bg also fades toward the palette's dark tint as temperature rises
+  const baseBg = palette
+    ? `color-mix(in srgb, ${palette.base} ${Math.round((1 - intensity * 0.6) * 100)}%, #111)`
+    : NEUTRAL_BASE;
+
+  const handleQuery = (v) => {
+    setQuery(v);
+    onQueryChange?.(v);
+  };
+  const handleTemp = (v) => {
+    setTemperature(v);
+    onTempChange?.(v);
+  };
+
+  const handleFind = () => {
+    if (!query.trim()) { inputRef.current?.focus(); return; }
+    setLeaving(true);
+    setTimeout(() => onFind(query, temperature), 380);
+  };
+
+  const onKey = (e) => { if (e.key === 'Enter') handleFind(); };
+
+  return (
+    <div className={`landing-screen${leaving ? ' screen-leave' : ''}`}>
+      {/* Animated gradient background */}
+      <div className="landing-bg" style={{ background: baseBg, transition:'background 2s ease' }} />
+
+      {/* Blob 1 — top-right dominant (crimson) */}
+      <div className="blob" style={{
+        width:1000*blobScale, height:1000*blobScale, top:'-25%', right:'-15%',
+        background: blobs[0], opacity: intensity * 0.95,
+        filter:`blur(${blobBlur}px)`,
+        animation:'blob1 12s ease-in-out infinite',
+      }} />
+      {/* Blob 2 — bottom-left (deep magenta) */}
+      <div className="blob" style={{
+        width:900*blobScale, height:900*blobScale, bottom:'-25%', left:'-15%',
+        background: blobs[1], opacity: intensity * 0.90,
+        filter:`blur(${blobBlur + 5}px)`,
+        animation:'blob2 15s ease-in-out infinite',
+      }} />
+      {/* Blob 3 — center warm orange */}
+      <div className="blob" style={{
+        width:750*blobScale, height:750*blobScale, top:'20%', right:'10%',
+        background: blobs[2], opacity: intensity * 0.80,
+        filter:`blur(${blobBlur - 5}px)`,
+        animation:'blob3 10s ease-in-out infinite',
+      }} />
+      {/* Blob 4 — top-left (dark red accent) */}
+      <div className="blob" style={{
+        width:700*blobScale, height:700*blobScale, top:'-5%', left:'-5%',
+        background: blobs[3], opacity: intensity * 0.75,
+        filter:`blur(${blobBlur + 10}px)`,
+        animation:'blob4 18s ease-in-out infinite',
+      }} />
+      {/* Blob 5 — bottom-center fill */}
+      <div className="blob" style={{
+        width:650*blobScale, height:650*blobScale, bottom:'-10%', left:'30%',
+        background: blobs[0], opacity: intensity * 0.65,
+        filter:`blur(${blobBlur + 15}px)`,
+        animation:'blob5 14s 3s ease-in-out infinite',
+      }} />
+
+      {/* Noise overlay for texture */}
+      <div style={{
+        position:'absolute', inset:0, zIndex:1, pointerEvents:'none',
+        backgroundImage:`url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
+        backgroundRepeat:'repeat', backgroundSize:'200px 200px',
+        mixBlendMode:'overlay', opacity:0.5,
+      }} />
+
+      {/* Main content */}
+      <div className="landing-content">
+        <div className="landing-eyebrow">Search by word, feeling, or idea</div>
+
+        <div className="show-me-row">
+          <span className="show-me-static">Show me</span>
+          <div className="show-me-input-wrap" data-value={query || PLACEHOLDERS[phIndex]}>
+            <input
+              ref={inputRef}
+              className="show-me-input"
+              type="text"
+              value={query}
+              onChange={e => handleQuery(e.target.value)}
+              onKeyDown={onKey}
+              placeholder={PLACEHOLDERS[phIndex]}
+              spellCheck={false}
+              autoComplete="off"
+            />
+          </div>
+          <span className="show-me-cursor" />
+        </div>
+
+        <TickSlider value={temperature} onChange={handleTemp} />
+
+        <button className="find-btn" onClick={handleFind}>
+          Find
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M6.75 4.5L11.25 9L6.75 13.5" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Artwork data ─────────────────────────────────────────────────────────────
+const ARTWORKS = [
+  { id:1,  img:IMGS.aw7, title:"Watson and the Shark",              artist:"John Singleton Copley",  year:"1778",    medium:"Oil on canvas",       dims:"182.1×229.2 cm",  tags:["dramatic","water","fear","sensory"],           spreadX:81.8, spreadY:6.2,  focusedX:56, focusedY:42, baseSize:82, relevance:0.81 },
+  { id:2,  img:IMGS.aw6, title:"Still Life with Flowers",           artist:"Jan van Huysum",         year:"1726",    medium:"Oil on panel",        dims:"80.3×61.6 cm",    tags:["flowers","nature","lush","familiar"],          spreadX:75.6, spreadY:12.3, focusedX:54, focusedY:40, baseSize:74, relevance:0.70 },
+  { id:3,  img:IMGS.aw1, title:"The Letter",                        artist:"Mary Cassatt",           year:"1890–91", medium:"Drypoint & aquatint", dims:"34.6×22.9 cm",    tags:["memory","intimate","solitude","familiar"],     spreadX:85.9, spreadY:22.7, focusedX:59, focusedY:44, baseSize:67, relevance:0.60 },
+  { id:4,  img:IMGS.aw5, title:"Arrangement in Grey and Black",     artist:"James McNeill Whistler", year:"1871",    medium:"Oil on canvas",       dims:"144.3×162.5 cm",  tags:["lonely","grey","memory","quiet"],              spreadX:71.8, spreadY:30.5, focusedX:52, focusedY:47, baseSize:56, relevance:0.46 },
+  { id:5,  img:IMGS.aw3, title:"Nocturne: Blue and Silver",         artist:"James McNeill Whistler", year:"c.1872",  medium:"Oil on panel",        dims:"44.5×62.2 cm",    tags:["night","mystery","sensory","novel"],           spreadX:77.9, spreadY:37.2, focusedX:57, focusedY:50, baseSize:54, relevance:0.43 },
+  { id:6,  img:IMGS.aw2, title:"Sunflowers",                        artist:"Vincent van Gogh",       year:"1888",    medium:"Oil on canvas",       dims:"92.1×73 cm",      tags:["flowers","yellow","energy","familiar"],        spreadX:60.7, spreadY:18.5, focusedX:53, focusedY:43, baseSize:50, relevance:0.38 },
+  { id:7,  img:IMGS.aw0, title:"The Luncheon of the Boating Party", artist:"Pierre-Auguste Renoir",  year:"1880–81", medium:"Oil on canvas",       dims:"130.2×175.6 cm",  tags:["social","gathering","familiar","light"],       spreadX:24.1, spreadY:20.3, focusedX:47, focusedY:44, baseSize:48, relevance:0.35 },
+  { id:8,  img:IMGS.aw4, title:"The Hunt in the Forest",            artist:"Paolo Uccello",          year:"c.1470",  medium:"Tempera on panel",    dims:"65.3×165 cm",     tags:["forest","movement","historical","semantic"],   spreadX:34.5, spreadY:25.1, focusedX:49, focusedY:46, baseSize:48, relevance:0.35 },
+  { id:9,  img:IMGS.aw9, title:"Girl with a Pearl Earring",         artist:"Johannes Vermeer",       year:"c.1665",  medium:"Oil on canvas",       dims:"44.5×39 cm",      tags:["portrait","intimate","familiar","gaze"],       spreadX:51.5, spreadY:44.2, focusedX:51, focusedY:48, baseSize:48, relevance:0.35 },
+  { id:10, img:IMGS.aw10,title:"The Birth of Venus",                artist:"Sandro Botticelli",      year:"c.1484",  medium:"Tempera on canvas",   dims:"172.5×278.9 cm",  tags:["mythological","beauty","novel","sensory"],     spreadX:17.1, spreadY:82.8, focusedX:46, focusedY:52, baseSize:48, relevance:0.35 },
+  { id:11, img:IMGS.aw11,title:"Starry Night Over the Rhône",       artist:"Vincent van Gogh",       year:"1888",    medium:"Oil on canvas",       dims:"72.5×92 cm",      tags:["night","stars","emotional","novel"],           spreadX:83.4, spreadY:73.5, focusedX:55, focusedY:53, baseSize:48, relevance:0.35 },
+  { id:12, img:IMGS.aw8, title:"The Fighting Temeraire",            artist:"J.M.W. Turner",          year:"1839",    medium:"Oil on canvas",       dims:"90.7×121.9 cm",   tags:["nostalgia","memory","twilight","novel"],       spreadX:36.6, spreadY:90.1, focusedX:48, focusedY:55, baseSize:48, relevance:0.35 },
+  { id:13, img:IMGS.aw6, title:"A Vase of Flowers",                 artist:"Dutch Master",           year:"c.1700",  medium:"Oil on canvas",       dims:"58×46 cm",        tags:["flowers","still life","familiar"],             spreadX:19.6, spreadY:45.6, focusedX:46, focusedY:50, baseSize:48, relevance:0.35 },
+  { id:14, img:IMGS.aw2, title:"Water Lilies",                      artist:"Claude Monet",           year:"1906",    medium:"Oil on canvas",       dims:"89.9×94.1 cm",    tags:["flowers","water","memory","sensory"],          spreadX:42.6, spreadY:55.6, focusedX:50, focusedY:51, baseSize:48, relevance:0.35 },
+  { id:15, img:IMGS.aw7, title:"Breezing Up (A Fair Wind)",         artist:"Winslow Homer",          year:"1873–76", medium:"Oil on canvas",       dims:"61.5×97 cm",      tags:["water","freedom","sensory","familiar"],        spreadX:72.6, spreadY:56.6, focusedX:54, focusedY:51, baseSize:48, relevance:0.35 },
+  { id:16, img:IMGS.aw1, title:"In the Meadow",                     artist:"Pierre-Auguste Renoir",  year:"c.1892",  medium:"Oil on canvas",       dims:"81.3×65.1 cm",    tags:["nature","solitude","flowers","familiar"],      spreadX:88.6, spreadY:43.6, focusedX:57, focusedY:49, baseSize:48, relevance:0.35 },
+  { id:17, img:IMGS.aw0, title:"Young Woman with a Lute",           artist:"Johannes Vermeer",       year:"c.1662",  medium:"Oil on canvas",       dims:"51.4×45.7 cm",    tags:["intimate","lonely","music","familiar"],        spreadX:29.6, spreadY:63.6, focusedX:48, focusedY:52, baseSize:48, relevance:0.35 },
+  { id:18, img:IMGS.aw9, title:"Self-Portrait",                     artist:"Rembrandt van Rijn",     year:"1659",    medium:"Oil on canvas",       dims:"84.5×66 cm",      tags:["introspective","memory","lonely","familiar"],  spreadX:91.6, spreadY:51.6, focusedX:58, focusedY:50, baseSize:48, relevance:0.35 },
+];
+
+function lerp(a,b,t) { return a+(b-a)*t; }
+function clamp(v,lo,hi) { return Math.max(lo,Math.min(hi,v)); }
+
+// ─── Color utilities ─────────────────────────────────────────────────────────
+function hsvToRgb(h, s, v) {
+  const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+  let r=0, g=0, b=0;
+  if      (h < 60)  { r=c; g=x; }
+  else if (h < 120) { r=x; g=c; }
+  else if (h < 180) { g=c; b=x; }
+  else if (h < 240) { g=x; b=c; }
+  else if (h < 300) { r=x; b=c; }
+  else              { r=c; b=x; }
+  return [Math.round((r+m)*255), Math.round((g+m)*255), Math.round((b+m)*255)];
+}
+function rgbToHex(r, g, b) {
+  return '#' + [r,g,b].map(n => n.toString(16).padStart(2,'0')).join('');
+}
+function hexToHsv(hex) {
+  const r=parseInt(hex.slice(1,3),16)/255, g=parseInt(hex.slice(3,5),16)/255, b=parseInt(hex.slice(5,7),16)/255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b), d=max-min;
+  const v=max, s=max===0?0:d/max;
+  let h=0;
+  if (d!==0) {
+    if      (max===r) h=((g-b)/d+(g<b?6:0))*60;
+    else if (max===g) h=((b-r)/d+2)*60;
+    else              h=((r-g)/d+4)*60;
+  }
+  return { h, s, v };
+}
+// Map hue → semantically related artwork tags
+function getColorTags(hue) {
+  if (hue < 30 || hue >= 330) return ['dramatic','fire','vibrant','energy','sensory'];
+  if (hue < 60)                return ['vibrant','sunset','energy','warm'];
+  if (hue < 90)                return ['yellow','flowers','familiar','golden'];
+  if (hue < 150)               return ['nature','forest','earth','wild'];
+  if (hue < 180)               return ['water','ocean','calm','serene'];
+  if (hue < 240)               return ['ocean','water','deep','serene','night'];
+  if (hue < 270)               return ['night','stars','mystery','dream'];
+  return                              ['mystery','memory','intimate','surreal'];
+}
+
+// ─── Color Picker Popover ─────────────────────────────────────────────────────
+function ColorPickerPopover({ anchorRight, anchorTop, onApply, onClear, onClose }) {
+  const [hue, setHue] = useState(0);
+  const [s, setS]     = useState(1);
+  const [v, setV]     = useState(1);
+  const [hexInput, setHexInput] = useState('#ff0000');
+
+  const svRef  = useRef(null);
+  const hueRef = useRef(null);
+  const draggingSV  = useRef(false);
+  const draggingHue = useRef(false);
+  const containerRef = useRef(null);
+
+  // Sync hex when hsv changes
+  useEffect(() => {
+    const [r,g,b] = hsvToRgb(hue, s, v);
+    setHexInput(rgbToHex(r, g, b));
+  }, [hue, s, v]);
+
+  // Close on outside click
+  useEffect(() => {
+    const onDown = (e) => { if (containerRef.current && !containerRef.current.contains(e.target)) onClose(); };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [onClose]);
+
+  const pureHex    = rgbToHex(...hsvToRgb(hue, 1, 1));
+  const currentHex = rgbToHex(...hsvToRgb(hue, s, v));
+
+  // SV gradient drag
+  const getSV = (e) => {
+    const r = svRef.current.getBoundingClientRect();
+    return { ns: clamp((e.clientX-r.left)/r.width,0,1), nv: 1-clamp((e.clientY-r.top)/r.height,0,1) };
+  };
+  const onSVDown = (e) => { draggingSV.current=true; svRef.current.setPointerCapture(e.pointerId); const {ns,nv}=getSV(e); setS(ns); setV(nv); };
+  const onSVMove = (e) => { if (!draggingSV.current) return; const {ns,nv}=getSV(e); setS(ns); setV(nv); };
+  const onSVUp   = ()  => { draggingSV.current=false; };
+
+  // Hue slider drag
+  const getHue = (e) => { const r=hueRef.current.getBoundingClientRect(); return clamp((e.clientX-r.left)/r.width,0,1)*360; };
+  const onHueDown = (e) => { draggingHue.current=true; hueRef.current.setPointerCapture(e.pointerId); setHue(getHue(e)); };
+  const onHueMove = (e) => { if (!draggingHue.current) return; setHue(getHue(e)); };
+  const onHueUp   = ()  => { draggingHue.current=false; };
+
+  const onHexInput = (val) => {
+    setHexInput(val);
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) { const {h,s:ns,v:nv}=hexToHsv(val); setHue(h); setS(ns); setV(nv); }
+  };
+
+  return (
+    <div ref={containerRef} style={{
+      position:'fixed', top:anchorTop, right:anchorRight,
+      width:240,
+      background:'#fff', border:'1px solid #e5e7eb', borderRadius:10,
+      boxShadow:'0 20px 25px rgba(0,0,0,0.10),0 8px 10px rgba(0,0,0,0.10)',
+      padding:'17px 17px 0',
+      display:'flex', flexDirection:'column', gap:12,
+      zIndex:300,
+      animation:'tooltipFadeIn 0.15s cubic-bezier(0.16,1,0.3,1) both',
+    }}>
+      {/* SV gradient square */}
+      <div ref={svRef} style={{
+        height:160, borderRadius:4, position:'relative', cursor:'crosshair', flexShrink:0,
+        background:`linear-gradient(to bottom, transparent, #000),
+                    linear-gradient(to right, #fff, ${pureHex})`,
+      }}
+        onPointerDown={onSVDown} onPointerMove={onSVMove} onPointerUp={onSVUp}
+      >
+        <div style={{
+          position:'absolute', left:`${s*100}%`, top:`${(1-v)*100}%`,
+          transform:'translate(-50%,-50%)',
+          width:16, height:16, borderRadius:'50%',
+          border:'2px solid #fff',
+          boxShadow:'0 2px 6px rgba(0,0,0,0.35)',
+          background:'transparent', pointerEvents:'none',
+        }} />
+      </div>
+
+      {/* Hue slider */}
+      <div style={{ paddingTop:6 }}>
+        <div ref={hueRef} style={{
+          height:12, borderRadius:10, position:'relative', cursor:'pointer', flexShrink:0,
+          background:'linear-gradient(to right,#f00 0%,#ff0 16.67%,#0f0 33.33%,#0ff 50%,#00f 66.67%,#f0f 83.33%,#f00 100%)',
+        }}
+          onPointerDown={onHueDown} onPointerMove={onHueMove} onPointerUp={onHueUp}
+        >
+          <div style={{
+            position:'absolute', left:`${(hue/360)*100}%`, top:'50%',
+            transform:'translate(-50%,-50%)',
+            width:16, height:16, borderRadius:'50%',
+            background:pureHex, border:'2px solid #fff',
+            boxShadow:'0 2px 4px rgba(0,0,0,0.3)', pointerEvents:'none',
+          }} />
+        </div>
+      </div>
+
+      {/* Preview swatch + hex input */}
+      <div style={{ display:'flex', gap:8, alignItems:'center', height:40 }}>
+        <div style={{ width:40, height:40, flexShrink:0, background:currentHex, borderRadius:4, border:'1px solid #d1d5dc' }} />
+        <div style={{ flex:1, height:30, background:'#f9fafb', border:'1px solid #d1d5dc', borderRadius:4, display:'flex', alignItems:'center', padding:'0 8px' }}>
+          <input type="text" value={hexInput} onChange={e=>onHexInput(e.target.value)} spellCheck={false}
+            style={{ fontFamily:'Menlo,monospace', fontSize:12, color:'#364153', background:'none', border:'none', outline:'none', width:'100%' }}
+          />
+        </div>
+      </div>
+
+      {/* Apply / Clear */}
+      <div style={{ display:'flex', gap:8, height:34, marginBottom:17 }}>
+        <button onClick={()=>onApply(currentHex,hue)}
+          style={{ flex:1, background:'#101828', border:'none', borderRadius:4, color:'#fff', fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:500, cursor:'pointer', transition:'background 0.15s' }}
+          onMouseEnter={e=>e.currentTarget.style.background='#1d2939'}
+          onMouseLeave={e=>e.currentTarget.style.background='#101828'}
+        >Apply</button>
+        <button onClick={onClear}
+          style={{ width:56, background:'none', border:'1px solid #d1d5dc', borderRadius:4, color:'#364153', fontFamily:'Inter,sans-serif', fontSize:12, fontWeight:500, cursor:'pointer', transition:'background 0.15s' }}
+          onMouseEnter={e=>e.currentTarget.style.background='#f9fafb'}
+          onMouseLeave={e=>e.currentTarget.style.background='none'}
+        >Clear</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Exploratory Canvas ───────────────────────────────────────────────────────
+function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
+  const [temperature, setTemperature] = useState(initialTemperature ?? 0.62);
+  const [zoom,        setZoom]        = useState(1);
+  const [hoveredId,   setHoveredId]   = useState(null);
+  const [tooltipPos,  setTooltipPos]  = useState({ x:0, y:0 });
+  const [searchQuery, setSearchQuery] = useState(initialQuery || '');
+  const [pan,         setPan]         = useState({ x:0, y:0 });
+  const [isDragging,  setIsDragging]  = useState(false);
+  const [loaded,      setLoaded]      = useState(false);
+  const [colorFilter, setColorFilter] = useState(null); // { hex, hue } | null
+  const [showPicker,  setShowPicker]  = useState(false);
+  const pickerBtnRef = useRef(null);
+
+  const dragStart = useRef(null);
+  const canvasRef = useRef(null);
+
+  useEffect(() => { const t = setTimeout(() => setLoaded(true), 80); return () => clearTimeout(t); }, []);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === '=' || e.key === '+') setZoom(z => clamp(z+0.15, 0.4, 3));
+      if (e.key === '-')                  setZoom(z => clamp(z-0.15, 0.4, 3));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const onWheel = (e) => { e.preventDefault(); setZoom(z => clamp(z+(e.deltaY<0?0.08:-0.08), 0.4, 3)); };
+    el.addEventListener('wheel', onWheel, { passive:false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
+  const handleZoomIn  = () => setZoom(z => clamp(z+0.25,0.4,3));
+  const handleZoomOut = () => setZoom(z => clamp(z-0.25,0.4,3));
+
+  const handleMouseDown = (e) => {
+    if (e.target.closest('.artwork-node') || e.target.closest('.btn')) return;
+    setIsDragging(true);
+    dragStart.current = { x:e.clientX-pan.x, y:e.clientY-pan.y };
+    e.preventDefault();
+  };
+  const handleMouseMove = useCallback((e) => {
+    if (!isDragging || !dragStart.current) return;
+    setPan({ x:e.clientX-dragStart.current.x, y:e.clientY-dragStart.current.y });
+  }, [isDragging]);
+  const handleMouseUp = () => { setIsDragging(false); dragStart.current=null; };
+
+  // Score each artwork against the current query + active colour filter
+  const scoredArtworks = useMemo(() => {
+    const words     = searchQuery.toLowerCase().trim().split(/\s+/).filter(w => w.length > 1);
+    const colorTags = colorFilter ? getColorTags(colorFilter.hue) : [];
+    const hasFilter = words.length > 0 || colorFilter !== null;
+    return ARTWORKS.map(a => {
+      let boost = 0;
+      for (const w of words) {
+        for (const tag of a.tags) { if (tag.includes(w) || w.includes(tag)) boost += 2; }
+        if (a.title.toLowerCase().includes(w))  boost += 1.5;
+        if (a.artist.toLowerCase().includes(w)) boost += 0.5;
+        if (a.medium.toLowerCase().includes(w)) boost += 0.5;
+      }
+      for (const tag of a.tags) { if (colorTags.includes(tag)) boost += 1.5; }
+      const score = hasFilter ? (boost > 0 ? boost + a.relevance : a.relevance * 0.12) : a.relevance;
+      return { ...a, score };
+    }).sort((a, b) => b.score - a.score);
+  }, [searchQuery, colorFilter]);
+
+  // Temperature controls how many artworks are visible: min 3 → max all
+  const visibleCount = Math.max(3, Math.round(3 + temperature * (ARTWORKS.length - 3)));
+  const visibleSet   = new Set(scoredArtworks.slice(0, visibleCount).map(a => a.id));
+  // Map id → rank for stagger timing
+  const rankById     = Object.fromEntries(scoredArtworks.map((a, i) => [a.id, i]));
+
+  const hoveredArtwork = ARTWORKS.find(a => a.id === hoveredId) || null;
+  const HEADER_H = 87, FOOTER_H = 89;
+  const zoomPct  = Math.round(zoom * 100);
+
+  return (
+    <div className="screen-enter" style={{ width:'100vw', height:'100vh', display:'flex', flexDirection:'column', overflow:'hidden' }}>
+
+      {/* Header */}
+      <header style={{ height:HEADER_H, flexShrink:0, background:'#fff', borderBottom:'1px solid #e5e7eb', display:'flex', alignItems:'center', justifyContent:'center', paddingBottom:1, position:'relative', zIndex:20 }}>
+        {/* Back button — top-left */}
+        <button
+          onClick={onBack}
+          title="Back to search"
+          style={{
+            position:'absolute', left:24, top:'50%', transform:'translateY(-50%)',
+            display:'flex', alignItems:'center', gap:6,
+            background:'none', border:'1px solid #e5e7eb', borderRadius:10,
+            padding:'8px 14px', cursor:'pointer', color:'#374151',
+            fontFamily:'Inter, sans-serif', fontSize:13, fontWeight:400,
+            letterSpacing:'-0.01em',
+            transition:'background 0.15s, border-color 0.15s, transform 0.1s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background='#f9fafb'}
+          onMouseLeave={e => e.currentTarget.style.background='none'}
+          onMouseDown={e  => e.currentTarget.style.transform='translateY(-50%) scale(0.95)'}
+          onMouseUp={e    => e.currentTarget.style.transform='translateY(-50%) scale(1)'}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M10 12L6 8L10 4" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Back
+        </button>
+
+        <div style={{ position:'relative', display:'flex', alignItems:'center', gap:12 }}>
+          <img src={IMGS.iconSearch} alt="" style={{ position:'absolute', left:16, top:'50%', transform:'translateY(-50%)', width:20, height:20, pointerEvents:'none' }} />
+          <input className="search-input" type="text" placeholder="Search by word, feeling, or idea…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          <button
+            ref={pickerBtnRef}
+            className="btn"
+            title="Colour filter"
+            onClick={() => setShowPicker(p => !p)}
+            style={{
+              outline: colorFilter ? `2px solid ${colorFilter.hex}` : 'none',
+              outlineOffset: 2,
+              position: 'relative',
+            }}
+          >
+            {colorFilter
+              ? <div style={{ width:20, height:20, borderRadius:4, background:colorFilter.hex, border:'1px solid rgba(0,0,0,0.1)' }} />
+              : <img src={IMGS.iconColorPicker} alt="Colour filter" style={{ width:20, height:20 }} />
+            }
+          </button>
+        </div>
+      </header>
+
+      {/* Colour picker popover */}
+      {showPicker && (
+        <ColorPickerPopover
+          anchorTop={87 + 8}
+          anchorRight={24}
+          onApply={(hex, hue) => { setColorFilter({ hex, hue }); setShowPicker(false); }}
+          onClear={() => { setColorFilter(null); setShowPicker(false); }}
+          onClose={() => setShowPicker(false)}
+        />
+      )}
+
+      {/* Canvas */}
+      <div ref={canvasRef} className="canvas-root" style={{ flex:1, cursor:isDragging?'grabbing':'grab', userSelect:'none' }}
+        onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
+      >
+        <div className="dot-grid" />
+        <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:1,
+          background:`radial-gradient(ellipse 40% 30% at 50% 0%,rgba(147,197,253,0.10) 0%,transparent 100%),radial-gradient(ellipse 40% 30% at 50% 100%,rgba(254,202,202,0.10) 0%,transparent 100%),radial-gradient(ellipse 20% 50% at 0% 50%,rgba(196,181,253,0.10) 0%,transparent 100%),radial-gradient(ellipse 20% 50% at 100% 50%,rgba(253,230,138,0.10) 0%,transparent 100%)`
+        }} />
+
+        {/* Fixed axis labels */}
+        <span className="axis-label" style={{ top:20,   left:'50%', transform:'translateX(-50%)', zIndex:5 }}>Familiar</span>
+        <span className="axis-label" style={{ bottom:20, left:'50%', transform:'translateX(-50%)', zIndex:5 }}>Novel</span>
+        <span className="axis-label" style={{ left:20,  top:'50%',  transform:'translateY(-50%) rotate(-90deg)', zIndex:5 }}>Semantic</span>
+        <span className="axis-label" style={{ right:20, top:'50%',  transform:'translateY(-50%) rotate(90deg)',  zIndex:5 }}>Sensory</span>
+
+        {/* Pan + zoom layer */}
+        <div className="canvas-inner" style={{ transform:`translate(${pan.x}px,${pan.y}px) scale(${zoom})`, transformOrigin:'center center', transition:isDragging?'none':'transform 0.25s cubic-bezier(0.16,1,0.3,1)', zIndex:2 }}>
+          {ARTWORKS.map((artwork, i) => {
+            const t    = temperature;
+            const x    = lerp(artwork.focusedX, artwork.spreadX, t);
+            const y    = lerp(artwork.focusedY, artwork.spreadY, t);
+            const size = lerp(artwork.baseSize * 0.72, artwork.baseSize, t);
+            const baseOp = lerp(artwork.relevance*0.55+0.15, artwork.relevance, t);
+            const isVisible = visibleSet.has(artwork.id);
+            const isHovered = artwork.id === hoveredId;
+            const rank      = rankById[artwork.id] ?? i;
+            // Stagger entrance: top-ranked appear first
+            const entranceDelay = loaded ? rank * 35 : (1 - artwork.relevance) * 600;
+            const finalOp   = loaded && isVisible ? baseOp : 0;
+
+            return (
+              <div key={artwork.id} className="artwork-node" style={{
+                left:`${x}%`, top:`${y}%`, width:size, height:size,
+                opacity: finalOp,
+                transform:`translate(-50%,-50%) scale(${isHovered?1.18:1})`,
+                boxShadow: isHovered ? '0 20px 30px -6px rgba(0,0,0,0.22),0 8px 12px -4px rgba(0,0,0,0.14)' : '0 10px 15px -3px rgba(0,0,0,0.10),0 4px 6px -4px rgba(0,0,0,0.10)',
+                transition:[
+                  `left ${loaded?0.65:0}s cubic-bezier(0.34,1.56,0.64,1)`,
+                  `top ${loaded?0.65:0}s cubic-bezier(0.34,1.56,0.64,1)`,
+                  `width ${loaded?0.55:0}s cubic-bezier(0.34,1.56,0.64,1)`,
+                  `height ${loaded?0.55:0}s cubic-bezier(0.34,1.56,0.64,1)`,
+                  `opacity 0.5s ease ${entranceDelay}ms`,
+                  `transform 0.22s cubic-bezier(0.34,1.56,0.64,1)`,
+                  `box-shadow 0.22s ease`,
+                ].join(', '),
+                zIndex: isHovered ? 50 : Math.round((1 - rank / ARTWORKS.length) * 10),
+                pointerEvents: isVisible ? 'auto' : 'none',
+              }}
+                onMouseEnter={e => { setHoveredId(artwork.id); setTooltipPos({ x:e.clientX, y:e.clientY }); }}
+                onMouseMove={e => setTooltipPos({ x:e.clientX, y:e.clientY })}
+                onMouseLeave={() => setHoveredId(null)}
+              >
+                <img src={artwork.img} alt={artwork.title} />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Zoom controls */}
+        <div style={{ position:'absolute', top:24, right:24, display:'flex', flexDirection:'column', alignItems:'center', gap:8, zIndex:10 }}>
+          <button className="btn" onClick={handleZoomIn} title="Zoom in (=)">
+            <img src={IMGS.iconZoomIn} alt="Zoom in" style={{ width:20, height:20 }} />
+          </button>
+          <div style={{ background:'#fff', border:'1px solid #d1d5dc', borderRadius:10, boxShadow:'0 1px 3px rgba(0,0,0,0.10)', width:40, height:120, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:6, padding:'8px 0' }}>
+            <div className="zoom-pct">{zoomPct}%</div>
+            <div style={{ width:6, height:64, background:'#e5e7eb', borderRadius:999, position:'relative', overflow:'hidden' }}>
+              <div style={{ position:'absolute', bottom:0, left:0, width:'100%', height:`${((zoom-0.4)/(3-0.4))*100}%`, background:'#364153', borderRadius:999, transition:'height 0.25s cubic-bezier(0.16,1,0.3,1)' }} />
+            </div>
+          </div>
+          <button className="btn" onClick={handleZoomOut} title="Zoom out (-)">
+            <img src={IMGS.iconZoomOut} alt="Zoom out" style={{ width:20, height:20 }} />
+          </button>
+        </div>
+
+        {/* Tooltip */}
+        {hoveredArtwork && (() => {
+          const vw=window.innerWidth, vh=window.innerHeight, TW=210, TH=220;
+          let tx=tooltipPos.x+18, ty=tooltipPos.y-16;
+          if (tx+TW>vw-12) tx=tooltipPos.x-TW-12;
+          if (ty+TH>vh-12) ty=vh-TH-12;
+          if (ty<12) ty=12;
+          return (
+            <div className="tooltip" style={{ left:tx, top:ty }} key={hoveredArtwork.id}>
+              <img className="tooltip-img" src={hoveredArtwork.img} alt={hoveredArtwork.title} />
+              <div className="tooltip-title">{hoveredArtwork.title}</div>
+              <div className="tooltip-artist">{hoveredArtwork.artist}</div>
+              <div className="tooltip-meta">{hoveredArtwork.year} · {hoveredArtwork.medium}</div>
+              <div className="tooltip-tags">{hoveredArtwork.tags.slice(0,4).map(tag => <span className="tooltip-tag" key={tag}>{tag}</span>)}</div>
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* Footer / Temperature slider */}
+      <footer style={{ height:FOOTER_H, flexShrink:0, background:'#fff', borderTop:'1px solid #e5e7eb', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'flex-start', paddingTop:25, zIndex:20 }}>
+        <div style={{ width:448, display:'flex', flexDirection:'column', gap:8 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', padding:'0 4px' }}>
+            <span style={{ fontFamily:'Inter', fontWeight:300, fontSize:12, color:'#6a7282', lineHeight:'16px' }}>Focused</span>
+            <span style={{ fontFamily:'Inter', fontWeight:300, fontSize:12, color:'#6a7282', lineHeight:'16px' }}>Exploratory</span>
+          </div>
+          <input type="range" min={0} max={100} step={1}
+            value={Math.round(temperature*100)}
+            onChange={e => setTemperature(parseInt(e.target.value)/100)}
+            style={{ '--pct':`${temperature*100}%` }}
+          />
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+// ─── App root ─────────────────────────────────────────────────────────────────
+function App() {
+  const [screen, setScreen]       = useState('landing'); // 'landing' | 'canvas'
+  const [query, setQuery]         = useState('');
+  const [temperature, setTemp]    = useState(0.05);
+
+  const handleFind = (q, t) => {
+    setQuery(q);
+    setTemp(t);
+    setScreen('canvas');
+  };
+
+  return (
+    <div style={{ width:'100vw', height:'100vh', overflow:'hidden', background:'#111' }}>
+      {screen === 'landing' && (
+        <LandingScreen
+          initQuery={query}
+          initTemperature={temperature}
+          onQueryChange={setQuery}
+          onTempChange={setTemp}
+          onFind={handleFind}
+        />
+      )}
+      {screen === 'canvas' && (
+        <ExploratoryCanvas
+          initialQuery={query}
+          initialTemperature={Math.max(temperature, 0.05)}
+          onBack={() => setScreen('landing')}
+        />
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
