@@ -92,7 +92,7 @@
     .tooltip-tag   { font-size:10px; font-weight:400; color:#6a7282; background:#f3f4f6; border-radius:999px; padding:2px 7px; }
 
     .search-input {
-      width:620px; height:46px; padding:12px 16px 12px 48px;
+      width:min(620px, calc(100vw - 160px)); height:46px; padding:12px 16px 12px 48px;
       font-family:'Inter',sans-serif; font-size:14px; font-weight:400; color:#0a0a0a;
       background:#fff; border:1px solid #d1d5dc; border-radius:10px; outline:none;
       letter-spacing:-0.015em; transition:border-color 0.2s,box-shadow 0.2s;
@@ -125,16 +125,16 @@
       gap:0;
     }
     .landing-eyebrow {
-      font-size:16px; font-weight:300; letter-spacing:0.2px;
+      font-size:clamp(13px, 2vw, 16px); font-weight:300; letter-spacing:0.2px;
       color:rgba(255,255,255,0.45);
       margin-bottom:10px;
       animation:labelSlideIn 0.7s ease both;
     }
     .show-me-row {
       display:inline-flex; align-items:baseline; gap:10px;
-      font-size:32px; font-weight:500; letter-spacing:-0.04em;
+      font-size:clamp(22px, 5vw, 32px); font-weight:500; letter-spacing:-0.04em;
       animation:labelSlideIn 0.7s 0.08s ease both;
-      cursor:text;
+      cursor:text; max-width:calc(100vw - 48px);
     }
     .show-me-static { color:#fff; white-space:nowrap; flex-shrink:0; }
     /* CSS grid trick: ::after mirrors the value to size the cell;
@@ -142,7 +142,7 @@
        because the wrap never has a fixed width. */
     .show-me-input-wrap {
       display:inline-grid; align-items:baseline;
-      min-width:220px;
+      min-width:min(220px, 40vw);
     }
     .show-me-input-wrap::after {
       content: attr(data-value) '\00a0'; /* \00a0 = nbsp as cursor buffer */
@@ -175,8 +175,9 @@
 
     /* tick slider */
     .tick-slider-wrap {
-      position:relative; margin-top:120px;
+      position:relative; margin-top:clamp(48px, 10vh, 120px);
       animation:labelSlideIn 0.7s 0.18s ease both;
+      width:min(800px, calc(100vw - 48px));
     }
     .tick-bubble {
       position:absolute; top:-30px;
@@ -189,7 +190,7 @@
       pointer-events:none;
     }
     .tick-track {
-      width:800px; height:24px; position:relative; cursor:pointer;
+      width:100%; height:24px; position:relative; cursor:pointer;
     }
     .tick-thumb {
       position:absolute; top:50%; width:20px; height:20px;
@@ -229,6 +230,14 @@
 
     .screen-leave { animation:screenFadeOut 0.4s cubic-bezier(0.4,0,1,1) both; }
     .screen-enter { animation:screenFadeIn  0.5s 0.2s cubic-bezier(0,0,0.2,1) both; }
+
+    @media (max-width: 600px) {
+      .find-btn { font-size:16px; padding:12px 22px; }
+      .tick-bubble { font-size:10px; padding:3px 8px; top:-26px; }
+      .tick-labels { font-size:10px; }
+      .search-input { width:calc(100vw - 140px); font-size:13px; }
+      .tooltip { width:180px; }
+    }
   </style>
 </head>
 <body>
@@ -331,7 +340,7 @@ function TickSlider({ value, onChange }) {
       <div ref={trackRef} className="tick-track"
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
       >
-        <svg width="800" height="24" viewBox="0 0 800 24" overflow="visible"
+        <svg width="100%" height="24" viewBox="0 0 800 24" preserveAspectRatio="none" overflow="visible"
           style={{
             maskImage: `linear-gradient(to right, transparent, white ${Math.round(value * 38)}%, white)`,
             WebkitMaskImage: `linear-gradient(to right, transparent, white ${Math.round(value * 38)}%, white)`,
@@ -925,7 +934,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
 
       {/* Footer / Temperature slider */}
       <footer style={{ height:FOOTER_H, flexShrink:0, background:'#fff', borderTop:'1px solid #e5e7eb', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'flex-start', paddingTop:25, zIndex:20 }}>
-        <div style={{ width:448, display:'flex', flexDirection:'column', gap:8 }}>
+        <div style={{ width:'min(448px, calc(100vw - 48px))', display:'flex', flexDirection:'column', gap:8 }}>
           <div style={{ display:'flex', justifyContent:'space-between', padding:'0 4px' }}>
             <span style={{ fontFamily:'Inter', fontWeight:300, fontSize:12, color:'#6a7282', lineHeight:'16px' }}>Focused</span>
             <span style={{ fontFamily:'Inter', fontWeight:300, fontSize:12, color:'#6a7282', lineHeight:'16px' }}>Exploratory</span>
