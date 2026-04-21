@@ -260,10 +260,6 @@ const IMGS = {
   aw9:"https://www.figma.com/api/mcp/asset/93b3272b-d945-4853-9a20-d9a4c7c06fcc",
   aw10:"https://www.figma.com/api/mcp/asset/0c328e10-ec2e-4cce-aaf1-84aff9e586c2",
   aw11:"https://www.figma.com/api/mcp/asset/7553f8d3-f36b-40d9-9b0a-aeccc93b255d",
-  iconSearch:"https://www.figma.com/api/mcp/asset/3f411d51-5e47-4605-8e60-7785485bc8a5",
-  iconColorPicker:"https://www.figma.com/api/mcp/asset/3750c07f-8c8f-42d4-9f8c-f67b17db7dad",
-  iconZoomIn:"https://www.figma.com/api/mcp/asset/90965c47-9f2f-4edc-b1f8-488a2a8a673f",
-  iconZoomOut:"https://www.figma.com/api/mcp/asset/8f84cb02-f47f-4a62-b84b-bbfacb22bb6e",
 };
 
 // ─── Gradient colour palettes keyed to search intent ─────────────────────────
@@ -807,7 +803,10 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
         </button>
 
         <div style={{ position:'relative', display:'flex', alignItems:'center', gap:12 }}>
-          <img src={IMGS.iconSearch} alt="" style={{ position:'absolute', left:16, top:'50%', transform:'translateY(-50%)', width:20, height:20, pointerEvents:'none' }} />
+          <svg style={{ position:'absolute', left:16, top:'50%', transform:'translateY(-50%)', width:20, height:20, pointerEvents:'none' }} viewBox="0 0 20 20" fill="none">
+              <circle cx="8.5" cy="8.5" r="5" stroke="#9ca3af" strokeWidth="1.5"/>
+              <path d="M13 13L17 17" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
           <input className="search-input" type="text" placeholder="Search by word, feeling, or idea…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
           <button
             ref={pickerBtnRef}
@@ -822,7 +821,11 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
           >
             {colorFilter
               ? <div style={{ width:20, height:20, borderRadius:4, background:colorFilter.hex, border:'1px solid rgba(0,0,0,0.1)' }} />
-              : <img src={IMGS.iconColorPicker} alt="Colour filter" style={{ width:20, height:20 }} />
+              : <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <circle cx="10" cy="10" r="7" stroke="#374151" strokeWidth="1.5"/>
+                  <path d="M10 3C10 3 14 6.5 14 10C14 12.2 12.2 14 10 14C7.8 14 6 12.2 6 10C6 6.5 10 3Z" fill="#374151" opacity="0.15"/>
+                  <circle cx="10" cy="10" r="2" fill="#374151"/>
+                </svg>
             }
           </button>
         </div>
@@ -900,7 +903,11 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
         {/* Zoom controls */}
         <div style={{ position:'absolute', top:24, right:24, display:'flex', flexDirection:'column', alignItems:'center', gap:8, zIndex:10 }}>
           <button className="btn" onClick={handleZoomIn} title="Zoom in (=)">
-            <img src={IMGS.iconZoomIn} alt="Zoom in" style={{ width:20, height:20 }} />
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="9" cy="9" r="5.5" stroke="#374151" strokeWidth="1.5"/>
+              <path d="M9 6.5V11.5M6.5 9H11.5" stroke="#374151" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M13.5 13.5L17 17" stroke="#374151" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
           </button>
           <div style={{ background:'#fff', border:'1px solid #d1d5dc', borderRadius:10, boxShadow:'0 1px 3px rgba(0,0,0,0.10)', width:40, height:120, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:6, padding:'8px 0' }}>
             <div className="zoom-pct">{zoomPct}%</div>
@@ -909,7 +916,11 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
             </div>
           </div>
           <button className="btn" onClick={handleZoomOut} title="Zoom out (-)">
-            <img src={IMGS.iconZoomOut} alt="Zoom out" style={{ width:20, height:20 }} />
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="9" cy="9" r="5.5" stroke="#374151" strokeWidth="1.5"/>
+              <path d="M6.5 9H11.5" stroke="#374151" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M13.5 13.5L17 17" stroke="#374151" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
           </button>
         </div>
 
