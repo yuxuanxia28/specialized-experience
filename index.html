@@ -311,7 +311,12 @@ function TickSlider({ value, onChange }) {
       <div ref={trackRef} className="tick-track"
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
       >
-        <svg width="600" height="15" viewBox="0 0 600 15" overflow="visible">
+        <svg width="600" height="15" viewBox="0 0 600 15" overflow="visible"
+          style={{
+            maskImage: `linear-gradient(to right, transparent, white ${Math.round(value * 38)}%, white)`,
+            WebkitMaskImage: `linear-gradient(to right, transparent, white ${Math.round(value * 38)}%, white)`,
+          }}
+        >
           {ticks.map((h, i) => {
             const x   = (i / (TICK_COUNT - 1)) * 600;
             const lit = i / (TICK_COUNT - 1) <= value;
