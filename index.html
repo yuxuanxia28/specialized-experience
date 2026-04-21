@@ -265,7 +265,7 @@ const IMGS = {
 
 // ─── Gradient colour palettes keyed to search intent ─────────────────────────
 const PALETTES = [
-  { keys:['vibrant','bright','colorful','lively','energy','fire','sunset','bold','alive','electric','joyful'],
+  { keys:['red','crimson','scarlet','vibrant','bright','colorful','lively','energy','fire','sunset','bold','alive','electric','joyful','flowers','floral','bloom','blossom','rose','petal','flower'],
     blobs:['#c0392b','#8e0a37','#e65100','#b03a2e'],   base:'#1a0208' },
   { keys:['lonely','alone','quiet','still','grey','gray','fog','mist','cold','silence','empty','solitude'],
     blobs:['#263238','#37474f','#1565c0','#0d1b2a'],   base:'#0a0e12' },
@@ -283,8 +283,8 @@ const PALETTES = [
     blobs:['#f9a825','#f57f17','#e65100','#827717'],   base:'#120a00' },
 ];
 
-const NEUTRAL_BLOBS   = ['#c0392b','#8e0a37','#e65100','#b03a2e'];
-const NEUTRAL_BASE    = '#1a0208';
+const NEUTRAL_BLOBS   = ['#1e1e2e','#16213e','#0f3460','#1a1a2e'];
+const NEUTRAL_BASE    = '#111';
 
 function getPalette(query) {
   if (!query.trim()) return null;
@@ -394,7 +394,7 @@ function LandingScreen({ onFind, initQuery, initTemperature, onQueryChange, onTe
 
   const palette = getPalette(query);
   // Quadratic ease-in: zero at low temp, fully vivid at high temp
-  const intensity = Math.max(0.35, Math.pow(temperature, 0.75));
+  const intensity = Math.pow(temperature, 0.75);
   // Blobs shrink to near-nothing at low temp, bloom to full size at high temp
   const blobScale = 0.15 + temperature * 0.85;
   // Less blur at high temperature = colours read as vivid rather than hazy
