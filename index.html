@@ -185,13 +185,13 @@
       pointer-events:none;
     }
     .tick-track {
-      width:600px; height:15px; position:relative; cursor:pointer;
+      width:800px; height:24px; position:relative; cursor:pointer;
     }
     .tick-thumb {
-      position:absolute; top:50%; width:14px; height:14px;
+      position:absolute; top:50%; width:20px; height:20px;
       background:#fff; border-radius:50%;
       transform:translate(-50%,-50%);
-      box-shadow:0 0 0 3px rgba(255,255,255,0.25), 0 2px 8px rgba(0,0,0,0.4);
+      box-shadow:0 0 0 4px rgba(255,255,255,0.25), 0 3px 12px rgba(0,0,0,0.5);
       pointer-events:none;
       transition:left 0.05s linear;
     }
@@ -288,7 +288,7 @@ function TickSlider({ value, onChange }) {
   const ticks = useMemo(() => Array.from({ length: TICK_COUNT }, (_, i) => {
     const norm = i / (TICK_COUNT - 1); // 0 → 1
     const edge = Math.min(norm, 1 - norm) * 2; // 0 at edges, 1 at center
-    const base = 15 - edge * 8;  // 15px at edges, ~7px at center
+    const base = 22 - edge * 12;  // 22px at edges, ~10px at center
     const jitter = Math.sin(i * 2.1 + 0.7) * 2;
     return Math.max(5, Math.round(base + jitter));
   }), []);
@@ -319,17 +319,17 @@ function TickSlider({ value, onChange }) {
       <div ref={trackRef} className="tick-track"
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
       >
-        <svg width="600" height="15" viewBox="0 0 600 15" overflow="visible"
+        <svg width="800" height="24" viewBox="0 0 800 24" overflow="visible"
           style={{
             maskImage: `linear-gradient(to right, transparent, white ${Math.round(value * 38)}%, white)`,
             WebkitMaskImage: `linear-gradient(to right, transparent, white ${Math.round(value * 38)}%, white)`,
           }}
         >
           {ticks.map((h, i) => {
-            const x   = (i / (TICK_COUNT - 1)) * 600;
+            const x   = (i / (TICK_COUNT - 1)) * 800;
             const lit = i / (TICK_COUNT - 1) <= value;
             return (
-              <rect key={i} x={x} y={(15 - h) / 2} width="1.5" height={h}
+              <rect key={i} x={x} y={(24 - h) / 2} width="2" height={h}
                 rx="1"
                 fill={lit ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)'}
                 style={{ transition:'fill 0.12s ease' }}
