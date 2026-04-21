@@ -202,18 +202,26 @@
     }
     .find-btn {
       margin-top:32px;
-      display:flex; align-items:center; gap:2px;
+      display:flex; align-items:center; gap:6px;
       background:#fff; border:none; border-radius:999px;
-      padding:8px 16px 8px 14px;
-      font-family:'Inter',sans-serif; font-size:15px; font-weight:500;
+      padding:14px 28px 14px 24px;
+      font-family:'Inter',sans-serif; font-size:19px; font-weight:500;
       letter-spacing:-0.02em; color:#000; cursor:pointer;
-      box-shadow:0 2px 12px rgba(0,0,0,0.3);
-      transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.18s ease;
+      box-shadow:0 2px 16px rgba(0,0,0,0.3);
+      transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1),
+                 box-shadow 0.22s ease,
+                 background 0.22s ease;
       animation:labelSlideIn 0.7s 0.26s ease both;
     }
-    .find-btn:hover  { transform:scale(1.05); box-shadow:0 4px 20px rgba(0,0,0,0.4); }
+    .find-btn:hover {
+      transform:scale(1.07);
+      background:#fff;
+      box-shadow:0 0 0 6px rgba(255,255,255,0.15),
+                 0 0 40px 8px rgba(255,255,255,0.35),
+                 0 8px 32px rgba(0,0,0,0.3);
+    }
     .find-btn:active { transform:scale(0.97); }
-    .find-btn svg    { margin-left:2px; }
+    .find-btn svg    { margin-left:2px; width:20px; height:20px; }
 
     .screen-leave { animation:screenFadeOut 0.4s cubic-bezier(0.4,0,1,1) both; }
     .screen-enter { animation:screenFadeIn  0.5s 0.2s cubic-bezier(0,0,0.2,1) both; }
