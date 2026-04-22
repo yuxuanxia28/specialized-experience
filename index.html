@@ -137,37 +137,15 @@
       cursor:text; max-width:calc(100vw - 48px);
     }
     .show-me-static { color:#fff; white-space:nowrap; flex-shrink:0; }
-    /* CSS grid trick: ::after mirrors the value to size the cell;
-       input sits in the same cell and fills it — the row stays centred
-       because the wrap never has a fixed width. */
-    .show-me-input-wrap {
-      display:inline-grid; align-items:baseline;
-      min-width:min(220px, 40vw);
-    }
-    .show-me-input-wrap::after {
-      content: attr(data-value) '\00a0'; /* \00a0 = nbsp as cursor buffer */
-      white-space:pre;
-      visibility:hidden;
-      font:inherit;
-      letter-spacing:inherit;
-      grid-area:1/1;
-      padding-right:6px;
-    }
-    .show-me-input {
-      grid-area:1/1;
-      min-width:0; width:100%;
-      background:transparent; border:none; outline:none;
-      font:inherit; letter-spacing:inherit;
-      color:#fff;
-      caret-color:transparent;
-    }
-    .show-me-input::placeholder { color:rgba(255,255,255,0.4); }
+    .show-me-typed       { color:#fff; white-space:pre; }
+    .show-me-placeholder { color:rgba(255,255,255,0.4); white-space:pre; }
     .show-me-cursor {
       display:inline-block; width:2px; height:0.85em;
-      background:rgba(255,255,255,0.85); margin-left:1px; border-radius:1px;
-      flex-shrink:0; align-self:center; vertical-align:middle;
+      background:rgba(255,255,255,0.85); border-radius:1px;
+      vertical-align:middle; margin:0 1px;
       opacity:0; transition:opacity 0.15s ease;
     }
+    .show-me-cursor.visible { opacity:1; animation:cursorBlink 1.1s ease infinite; }
     .show-me-cursor.visible {
       opacity:1;
       animation:cursorBlink 1.1s ease infinite;
@@ -482,23 +460,23 @@ function LandingScreen({ onFind, initQuery, initTemperature, onQueryChange, onTe
         <div className="landing-eyebrow">Search by word, feeling, or idea</div>
 
         <div className="show-me-row" onClick={() => inputRef.current?.focus()}>
-          <span className="show-me-static">Show me</span>
-          <div className="show-me-input-wrap" data-value={query || PLACEHOLDERS[phIndex]}>
-            <input
-              ref={inputRef}
-              className="show-me-input"
-              type="text"
-              value={query}
-              onChange={e => handleQuery(e.target.value)}
-              onKeyDown={onKey}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
-              placeholder={PLACEHOLDERS[phIndex]}
-              spellCheck={false}
-              autoComplete="off"
-            />
-          </div>
+          <span className="show-me-static">Show me&nbsp;</span>
+          <span className="show-me-typed">{query}</span>
           <span className={`show-me-cursor${focused ? ' visible' : ''}`} />
+          {!query && <span className="show-me-placeholder">{PLACEHOLDERS[phIndex]}</span>}
+          {/* Hidden input captures keyboard events */}
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={e => handleQuery(e.target.value)}
+            onKeyDown={onKey}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            autoComplete="off"
+            spellCheck={false}
+            style={{ position:'absolute', opacity:0, width:'1px', height:'1px', pointerEvents:'none' }}
+          />
         </div>
 
         <TickSlider value={temperature} onChange={handleTemp} />
