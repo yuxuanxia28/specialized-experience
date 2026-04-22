@@ -462,8 +462,13 @@ function LandingScreen({ onFind, initQuery, initTemperature, onQueryChange, onTe
         <div className="show-me-row" onClick={() => inputRef.current?.focus()}>
           <span className="show-me-static">Show me&nbsp;</span>
           <span className="show-me-typed">{query}</span>
-          <span className={`show-me-cursor${focused ? ' visible' : ''}`} />
-          {!query && <span className="show-me-placeholder">{PLACEHOLDERS[phIndex]}</span>}
+          {query
+            ? <span className={`show-me-cursor${focused ? ' visible' : ''}`} />
+            : <>
+                <span className="show-me-placeholder">{PLACEHOLDERS[phIndex]}</span>
+                <span className={`show-me-cursor${focused ? ' visible' : ''}`} />
+              </>
+          }
           {/* Hidden input captures keyboard events */}
           <input
             ref={inputRef}
