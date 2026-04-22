@@ -246,21 +246,21 @@
 <script type="text/babel">
 const { useState, useRef, useCallback, useEffect, useMemo } = React;
 
-// ─── Assets ───────────────────────────────────────────────────────────────────
-const W = "https://upload.wikimedia.org/wikipedia/commons/thumb/";
+// ─── Assets (verified Wikimedia Commons thumbnail URLs) ──────────────────────
+const T = "https://upload.wikimedia.org/wikipedia/commons/thumb/";
 const IMGS = {
-  aw0: W+"3/37/Pierre-Auguste_Renoir_-_Luncheon_of_the_Boating_Party_-_Google_Art_Project.jpg/400px-Pierre-Auguste_Renoir_-_Luncheon_of_the_Boating_Party_-_Google_Art_Project.jpg",
-  aw1: W+"3/3b/Mary_Cassatt_-_The_Letter_-_Google_Art_Project.jpg/300px-Mary_Cassatt_-_The_Letter_-_Google_Art_Project.jpg",
-  aw2: W+"4/46/Vincent_van_Gogh_-_Sunflowers_-_VGM_F458.jpg/300px-Vincent_van_Gogh_-_Sunflowers_-_VGM_F458.jpg",
-  aw3: W+"3/37/Whistler_Nocturne_Blue_and_Gold_Old_Battersea_Bridge.jpg/300px-Whistler_Nocturne_Blue_and_Gold_Old_Battersea_Bridge.jpg",
-  aw4: W+"8/8e/Paolo_Uccello_047.jpg/400px-Paolo_Uccello_047.jpg",
-  aw5: W+"1/1b/Whistlers_Mother_high_res.jpg/300px-Whistlers_Mother_high_res.jpg",
-  aw6: W+"a/a5/Jan_van_Huysum_-_Vase_of_Flowers.jpg/300px-Jan_van_Huysum_-_Vase_of_Flowers.jpg",
-  aw7: W+"5/5f/Watson_and_the_Shark_1778_Copley.jpg/300px-Watson_and_the_Shark_1778_Copley.jpg",
-  aw8: W+"7/79/The_Fighting_Temeraire%2C_JMW_Turner%2C_National_Gallery.jpg/400px-The_Fighting_Temeraire%2C_JMW_Turner%2C_National_Gallery.jpg",
-  aw9: W+"0/0f/1665_Girl_with_a_Pearl_Earring.jpg/300px-1665_Girl_with_a_Pearl_Earring.jpg",
-  aw10:W+"2/26/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/400px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg",
-  aw11:W+"9/94/Starry_Night_Over_the_Rhone.jpg/300px-Starry_Night_Over_the_Rhone.jpg",
+  aw0: T+"8/8d/Pierre-Auguste_Renoir_-_Luncheon_of_the_Boating_Party_-_Google_Art_Project.jpg/400px-Pierre-Auguste_Renoir_-_Luncheon_of_the_Boating_Party_-_Google_Art_Project.jpg",
+  aw1: T+"9/9b/Mary_Cassatt_-_The_Letter.jpg/300px-Mary_Cassatt_-_The_Letter.jpg",
+  aw2: T+"9/9d/Vincent_van_Gogh_-_Sunflowers_-_VGM_F458.jpg/300px-Vincent_van_Gogh_-_Sunflowers_-_VGM_F458.jpg",
+  aw3: T+"7/7d/James_Abbott_McNeill_Whistler_-_Nocturne-_Blue_and_Silver_-_Chelsea_-_Google_Art_Project.jpg/400px-James_Abbott_McNeill_Whistler_-_Nocturne-_Blue_and_Silver_-_Chelsea_-_Google_Art_Project.jpg",
+  aw4: T+"c/c8/Hunt_in_the_forest_by_paolo_uccello.jpg/400px-Hunt_in_the_forest_by_paolo_uccello.jpg",
+  aw5: T+"1/1b/Whistlers_Mother_high_res.jpg/300px-Whistlers_Mother_high_res.jpg",
+  aw6: T+"a/a1/Van_Huysum%2C_Jan_-_Vase_with_Flowers_-_Google_Art_Project.jpg/300px-Van_Huysum%2C_Jan_-_Vase_with_Flowers_-_Google_Art_Project.jpg",
+  aw7: T+"9/94/John_Singleton_Copley_-_Watson_and_the_Shark_-_Google_Art_Project.jpg/400px-John_Singleton_Copley_-_Watson_and_the_Shark_-_Google_Art_Project.jpg",
+  aw8: T+"3/30/The_Fighting_Temeraire%2C_JMW_Turner%2C_National_Gallery.jpg/400px-The_Fighting_Temeraire%2C_JMW_Turner%2C_National_Gallery.jpg",
+  aw9: T+"0/0f/1665_Girl_with_a_Pearl_Earring.jpg/300px-1665_Girl_with_a_Pearl_Earring.jpg",
+  aw10:T+"0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/400px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg",
+  aw11:T+"9/94/Starry_Night_Over_the_Rhone.jpg/300px-Starry_Night_Over_the_Rhone.jpg",
 };
 
 // ─── Gradient colour palettes keyed to search intent ─────────────────────────
