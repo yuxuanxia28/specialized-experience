@@ -246,21 +246,25 @@
 <script type="text/babel">
 const { useState, useRef, useCallback, useEffect, useMemo } = React;
 
-// ─── Assets (verified Wikimedia Commons thumbnail URLs) ──────────────────────
-const T = "https://upload.wikimedia.org/wikipedia/commons/thumb/";
+// ─── Assets — Art Institute of Chicago open IIIF API (CORS-enabled) ──────────
+const AIC = id => `https://www.artic.edu/iiif/2/${id}/full/400,/0/default.jpg`;
 const IMGS = {
-  aw0: T+"8/8d/Pierre-Auguste_Renoir_-_Luncheon_of_the_Boating_Party_-_Google_Art_Project.jpg/400px-Pierre-Auguste_Renoir_-_Luncheon_of_the_Boating_Party_-_Google_Art_Project.jpg",
-  aw1: T+"9/9b/Mary_Cassatt_-_The_Letter.jpg/300px-Mary_Cassatt_-_The_Letter.jpg",
-  aw2: T+"9/9d/Vincent_van_Gogh_-_Sunflowers_-_VGM_F458.jpg/300px-Vincent_van_Gogh_-_Sunflowers_-_VGM_F458.jpg",
-  aw3: T+"7/7d/James_Abbott_McNeill_Whistler_-_Nocturne-_Blue_and_Silver_-_Chelsea_-_Google_Art_Project.jpg/400px-James_Abbott_McNeill_Whistler_-_Nocturne-_Blue_and_Silver_-_Chelsea_-_Google_Art_Project.jpg",
-  aw4: T+"c/c8/Hunt_in_the_forest_by_paolo_uccello.jpg/400px-Hunt_in_the_forest_by_paolo_uccello.jpg",
-  aw5: T+"1/1b/Whistlers_Mother_high_res.jpg/300px-Whistlers_Mother_high_res.jpg",
-  aw6: T+"a/a1/Van_Huysum%2C_Jan_-_Vase_with_Flowers_-_Google_Art_Project.jpg/300px-Van_Huysum%2C_Jan_-_Vase_with_Flowers_-_Google_Art_Project.jpg",
-  aw7: T+"9/94/John_Singleton_Copley_-_Watson_and_the_Shark_-_Google_Art_Project.jpg/400px-John_Singleton_Copley_-_Watson_and_the_Shark_-_Google_Art_Project.jpg",
-  aw8: T+"3/30/The_Fighting_Temeraire%2C_JMW_Turner%2C_National_Gallery.jpg/400px-The_Fighting_Temeraire%2C_JMW_Turner%2C_National_Gallery.jpg",
-  aw9: T+"0/0f/1665_Girl_with_a_Pearl_Earring.jpg/300px-1665_Girl_with_a_Pearl_Earring.jpg",
-  aw10:T+"0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/400px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg",
-  aw11:T+"9/94/Starry_Night_Over_the_Rhone.jpg/300px-Starry_Night_Over_the_Rhone.jpg",
+  aw0:  AIC('2d484387-2509-5e8e-2c43-22f9981972eb'), // Seurat — Sunday on La Grande Jatte
+  aw1:  AIC('831a05de-d3f6-f4fa-a460-23008dd58dda'), // Hopper — Nighthawks
+  aw2:  AIC('b272df73-a965-ac37-4172-be4e99483637'), // Wood — American Gothic
+  aw3:  AIC('3c27b499-af56-f0d5-93b5-a7f2f1ad5813'), // Monet — Water Lilies
+  aw4:  AIC('4e7f3081-179a-af18-8abd-7908a7ae8c4e'), // Picasso — Old Guitarist
+  aw5:  AIC('a38e2828-ec6f-ece1-a30f-70243449197b'), // Monet — Stacks of Wheat
+  aw6:  AIC('f8fd76e9-c396-5678-36ed-6a348c904d27'), // Caillebotte — Paris Street Rainy Day
+  aw7:  AIC('defb4004-b500-218d-3d9b-9a02423f097d'), // Toulouse-Lautrec — At the Moulin Rouge
+  aw8:  AIC('321c45f5-22a3-84a2-44cc-cf66642d4cf2'), // Renoir — Acrobats at the Cirque
+  aw9:  AIC('3b885ae0-4d46-5fe4-d70a-00474827f02c'), // Cassatt — The Child's Bath
+  aw10: AIC('5dca7347-c6dc-24dd-d073-d705b9cdc575'), // Homer — The Herring Net
+  aw11: AIC('6644829f-f292-c5c4-a73c-0356a6fdbf0d'), // Van Gogh — The Bedroom
+  aw12: AIC('ef0b4c76-c524-053a-f171-3e05f01f8d27'), // Degas — Ballet Dancer
+  aw13: AIC('cefba431-1241-6240-3a92-ffa787e5fa49'), // Chagall — White Crucifixion
+  aw14: AIC('1fca3700-114e-32a3-5c55-bb29831f3f86'), // Cassatt — In the Omnibus
+  aw15: AIC('a4bef587-48a4-d186-813d-f297441b1ab3'), // Gauguin — Day of the God
 };
 
 // ─── Gradient colour palettes keyed to search intent ─────────────────────────
@@ -509,24 +513,22 @@ function LandingScreen({ onFind, initQuery, initTemperature, onQueryChange, onTe
 
 // ─── Artwork data ─────────────────────────────────────────────────────────────
 const ARTWORKS = [
-  { id:1,  img:IMGS.aw7, title:"Watson and the Shark",              artist:"John Singleton Copley",  year:"1778",    medium:"Oil on canvas",       dims:"182.1×229.2 cm",  tags:["dramatic","water","fear","sensory"],           spreadX:81.8, spreadY:6.2,  focusedX:56, focusedY:42, baseSize:82, relevance:0.81 },
-  { id:2,  img:IMGS.aw6, title:"Still Life with Flowers",           artist:"Jan van Huysum",         year:"1726",    medium:"Oil on panel",        dims:"80.3×61.6 cm",    tags:["flowers","nature","lush","familiar"],          spreadX:75.6, spreadY:12.3, focusedX:54, focusedY:40, baseSize:74, relevance:0.70 },
-  { id:3,  img:IMGS.aw1, title:"The Letter",                        artist:"Mary Cassatt",           year:"1890–91", medium:"Drypoint & aquatint", dims:"34.6×22.9 cm",    tags:["memory","intimate","solitude","familiar"],     spreadX:85.9, spreadY:22.7, focusedX:59, focusedY:44, baseSize:67, relevance:0.60 },
-  { id:4,  img:IMGS.aw5, title:"Arrangement in Grey and Black",     artist:"James McNeill Whistler", year:"1871",    medium:"Oil on canvas",       dims:"144.3×162.5 cm",  tags:["lonely","grey","memory","quiet"],              spreadX:71.8, spreadY:30.5, focusedX:52, focusedY:47, baseSize:56, relevance:0.46 },
-  { id:5,  img:IMGS.aw3, title:"Nocturne: Blue and Silver",         artist:"James McNeill Whistler", year:"c.1872",  medium:"Oil on panel",        dims:"44.5×62.2 cm",    tags:["night","mystery","sensory","novel"],           spreadX:77.9, spreadY:37.2, focusedX:57, focusedY:50, baseSize:54, relevance:0.43 },
-  { id:6,  img:IMGS.aw2, title:"Sunflowers",                        artist:"Vincent van Gogh",       year:"1888",    medium:"Oil on canvas",       dims:"92.1×73 cm",      tags:["flowers","yellow","energy","familiar"],        spreadX:60.7, spreadY:18.5, focusedX:53, focusedY:43, baseSize:50, relevance:0.38 },
-  { id:7,  img:IMGS.aw0, title:"The Luncheon of the Boating Party", artist:"Pierre-Auguste Renoir",  year:"1880–81", medium:"Oil on canvas",       dims:"130.2×175.6 cm",  tags:["social","gathering","familiar","light"],       spreadX:24.1, spreadY:20.3, focusedX:47, focusedY:44, baseSize:48, relevance:0.35 },
-  { id:8,  img:IMGS.aw4, title:"The Hunt in the Forest",            artist:"Paolo Uccello",          year:"c.1470",  medium:"Tempera on panel",    dims:"65.3×165 cm",     tags:["forest","movement","historical","semantic"],   spreadX:34.5, spreadY:25.1, focusedX:49, focusedY:46, baseSize:48, relevance:0.35 },
-  { id:9,  img:IMGS.aw9, title:"Girl with a Pearl Earring",         artist:"Johannes Vermeer",       year:"c.1665",  medium:"Oil on canvas",       dims:"44.5×39 cm",      tags:["portrait","intimate","familiar","gaze"],       spreadX:51.5, spreadY:44.2, focusedX:51, focusedY:48, baseSize:48, relevance:0.35 },
-  { id:10, img:IMGS.aw10,title:"The Birth of Venus",                artist:"Sandro Botticelli",      year:"c.1484",  medium:"Tempera on canvas",   dims:"172.5×278.9 cm",  tags:["mythological","beauty","novel","sensory"],     spreadX:17.1, spreadY:82.8, focusedX:46, focusedY:52, baseSize:48, relevance:0.35 },
-  { id:11, img:IMGS.aw11,title:"Starry Night Over the Rhône",       artist:"Vincent van Gogh",       year:"1888",    medium:"Oil on canvas",       dims:"72.5×92 cm",      tags:["night","stars","emotional","novel"],           spreadX:83.4, spreadY:73.5, focusedX:55, focusedY:53, baseSize:48, relevance:0.35 },
-  { id:12, img:IMGS.aw8, title:"The Fighting Temeraire",            artist:"J.M.W. Turner",          year:"1839",    medium:"Oil on canvas",       dims:"90.7×121.9 cm",   tags:["nostalgia","memory","twilight","novel"],       spreadX:36.6, spreadY:90.1, focusedX:48, focusedY:55, baseSize:48, relevance:0.35 },
-  { id:13, img:IMGS.aw6, title:"A Vase of Flowers",                 artist:"Dutch Master",           year:"c.1700",  medium:"Oil on canvas",       dims:"58×46 cm",        tags:["flowers","still life","familiar"],             spreadX:19.6, spreadY:45.6, focusedX:46, focusedY:50, baseSize:48, relevance:0.35 },
-  { id:14, img:IMGS.aw2, title:"Water Lilies",                      artist:"Claude Monet",           year:"1906",    medium:"Oil on canvas",       dims:"89.9×94.1 cm",    tags:["flowers","water","memory","sensory"],          spreadX:42.6, spreadY:55.6, focusedX:50, focusedY:51, baseSize:48, relevance:0.35 },
-  { id:15, img:IMGS.aw7, title:"Breezing Up (A Fair Wind)",         artist:"Winslow Homer",          year:"1873–76", medium:"Oil on canvas",       dims:"61.5×97 cm",      tags:["water","freedom","sensory","familiar"],        spreadX:72.6, spreadY:56.6, focusedX:54, focusedY:51, baseSize:48, relevance:0.35 },
-  { id:16, img:IMGS.aw1, title:"In the Meadow",                     artist:"Pierre-Auguste Renoir",  year:"c.1892",  medium:"Oil on canvas",       dims:"81.3×65.1 cm",    tags:["nature","solitude","flowers","familiar"],      spreadX:88.6, spreadY:43.6, focusedX:57, focusedY:49, baseSize:48, relevance:0.35 },
-  { id:17, img:IMGS.aw0, title:"Young Woman with a Lute",           artist:"Johannes Vermeer",       year:"c.1662",  medium:"Oil on canvas",       dims:"51.4×45.7 cm",    tags:["intimate","lonely","music","familiar"],        spreadX:29.6, spreadY:63.6, focusedX:48, focusedY:52, baseSize:48, relevance:0.35 },
-  { id:18, img:IMGS.aw9, title:"Self-Portrait",                     artist:"Rembrandt van Rijn",     year:"1659",    medium:"Oil on canvas",       dims:"84.5×66 cm",      tags:["introspective","memory","lonely","familiar"],  spreadX:91.6, spreadY:51.6, focusedX:58, focusedY:50, baseSize:48, relevance:0.35 },
+  { id:1,  img:IMGS.aw0,  title:"A Sunday on La Grande Jatte",   artist:"Georges Seurat",            year:"1884–86", medium:"Oil on canvas",       dims:"207.5×308.1 cm", tags:["social","daylight","familiar","nature","light"],        spreadX:81.8, spreadY:6.2,  focusedX:56, focusedY:42, baseSize:82, relevance:0.81 },
+  { id:2,  img:IMGS.aw1,  title:"Nighthawks",                    artist:"Edward Hopper",             year:"1942",    medium:"Oil on canvas",       dims:"84.1×152.4 cm",  tags:["lonely","night","urban","solitude","quiet"],            spreadX:75.6, spreadY:12.3, focusedX:54, focusedY:40, baseSize:74, relevance:0.70 },
+  { id:3,  img:IMGS.aw2,  title:"American Gothic",               artist:"Grant Wood",                year:"1930",    medium:"Oil on beaverboard",  dims:"78×65.3 cm",     tags:["familiar","portrait","rural","historical","quiet"],     spreadX:85.9, spreadY:22.7, focusedX:59, focusedY:44, baseSize:67, relevance:0.60 },
+  { id:4,  img:IMGS.aw3,  title:"Water Lilies",                  artist:"Claude Monet",              year:"1906",    medium:"Oil on canvas",       dims:"89.9×94.1 cm",   tags:["flowers","water","memory","sensory","nature"],          spreadX:71.8, spreadY:30.5, focusedX:52, focusedY:47, baseSize:56, relevance:0.46 },
+  { id:5,  img:IMGS.aw4,  title:"The Old Guitarist",             artist:"Pablo Picasso",             year:"1903–04", medium:"Oil on panel",        dims:"122.9×82.6 cm",  tags:["lonely","dramatic","mystery","novel","solitude"],       spreadX:77.9, spreadY:37.2, focusedX:57, focusedY:50, baseSize:54, relevance:0.43 },
+  { id:6,  img:IMGS.aw5,  title:"Stacks of Wheat (End of Summer)",artist:"Claude Monet",            year:"1890–91", medium:"Oil on canvas",       dims:"60×100.6 cm",    tags:["nature","golden","memory","familiar","earth"],          spreadX:60.7, spreadY:18.5, focusedX:53, focusedY:43, baseSize:50, relevance:0.38 },
+  { id:7,  img:IMGS.aw6,  title:"Paris Street; Rainy Day",       artist:"Gustave Caillebotte",       year:"1877",    medium:"Oil on canvas",       dims:"212.2×276.2 cm", tags:["grey","rain","urban","familiar","quiet"],               spreadX:24.1, spreadY:20.3, focusedX:47, focusedY:44, baseSize:48, relevance:0.35 },
+  { id:8,  img:IMGS.aw7,  title:"At the Moulin Rouge",           artist:"Henri de Toulouse-Lautrec", year:"1892–95", medium:"Oil on canvas",       dims:"123×141 cm",     tags:["vibrant","social","night","novel","energy"],            spreadX:34.5, spreadY:25.1, focusedX:49, focusedY:46, baseSize:48, relevance:0.35 },
+  { id:9,  img:IMGS.aw8,  title:"Acrobats at the Cirque Fernando",artist:"Pierre-Auguste Renoir",   year:"1879",    medium:"Oil on canvas",       dims:"131.5×99.5 cm",  tags:["social","familiar","vibrant","joyful","energy"],        spreadX:51.5, spreadY:44.2, focusedX:51, focusedY:48, baseSize:48, relevance:0.35 },
+  { id:10, img:IMGS.aw9,  title:"The Child's Bath",              artist:"Mary Cassatt",              year:"1893",    medium:"Oil on canvas",       dims:"100.3×66.1 cm",  tags:["intimate","familiar","quiet","solitude","memory"],      spreadX:17.1, spreadY:82.8, focusedX:46, focusedY:52, baseSize:48, relevance:0.35 },
+  { id:11, img:IMGS.aw10, title:"The Herring Net",               artist:"Winslow Homer",             year:"1885",    medium:"Oil on canvas",       dims:"76.5×122.9 cm",  tags:["water","ocean","dramatic","sensory","energy"],          spreadX:83.4, spreadY:73.5, focusedX:55, focusedY:53, baseSize:48, relevance:0.35 },
+  { id:12, img:IMGS.aw11, title:"The Bedroom",                   artist:"Vincent van Gogh",          year:"1889",    medium:"Oil on canvas",       dims:"73.6×92.3 cm",   tags:["intimate","memory","solitude","novel","dream"],         spreadX:36.6, spreadY:90.1, focusedX:48, focusedY:55, baseSize:48, relevance:0.35 },
+  { id:13, img:IMGS.aw12, title:"Ballet Dancer",                 artist:"Edgar Degas",               year:"c.1880",  medium:"Oil on canvas",       dims:"61.5×50.2 cm",   tags:["movement","familiar","light","sensory","vibrant"],      spreadX:19.6, spreadY:45.6, focusedX:46, focusedY:50, baseSize:48, relevance:0.35 },
+  { id:14, img:IMGS.aw13, title:"White Crucifixion",             artist:"Marc Chagall",              year:"1938",    medium:"Oil on canvas",       dims:"154.3×139.7 cm", tags:["spiritual","mystery","surreal","novel","eerie"],        spreadX:42.6, spreadY:55.6, focusedX:50, focusedY:51, baseSize:48, relevance:0.35 },
+  { id:15, img:IMGS.aw14, title:"In the Omnibus",                artist:"Mary Cassatt",              year:"1891",    medium:"Drypoint & aquatint", dims:"36.4×26.8 cm",   tags:["social","familiar","light","quiet","intimate"],         spreadX:72.6, spreadY:56.6, focusedX:54, focusedY:51, baseSize:48, relevance:0.35 },
+  { id:16, img:IMGS.aw15, title:"Day of the God (Mahana no atua)",artist:"Paul Gauguin",            year:"1894",    medium:"Oil on canvas",       dims:"68.3×91.5 cm",   tags:["exotic","vibrant","tropical","novel","sensory"],        spreadX:88.6, spreadY:43.6, focusedX:57, focusedY:49, baseSize:48, relevance:0.35 },
 ];
 
 function lerp(a,b,t) { return a+(b-a)*t; }
