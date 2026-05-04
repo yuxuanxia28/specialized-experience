@@ -45,7 +45,7 @@
 
     .canvas-inner { position:absolute; inset:0; will-change:transform; }
 
-    .axis-label { position:absolute; font-family:'Inter',sans-serif; font-weight:300; font-size:14px; letter-spacing:0.03em; color:#99a1af; pointer-events:none; user-select:none; z-index:5; background:rgba(255,255,255,0.32); backdrop-filter:blur(50px); -webkit-backdrop-filter:blur(50px); filter:drop-shadow(0px 2px 2px rgba(0,0,0,0.10)); border-radius:12px; padding:8px 16px; white-space:nowrap; }
+    .axis-label { position:absolute; font-family:'Inter',sans-serif; font-weight:300; font-size:18px; line-height:24px; letter-spacing:0.4554px; color:#000; pointer-events:none; user-select:none; z-index:5; background:rgba(255,255,255,0.32); backdrop-filter:blur(100px); -webkit-backdrop-filter:blur(100px); filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.10)); border-radius:12px; padding:8px 16px; white-space:nowrap; }
     .quad-label  { position:absolute; font-family:'Inter',sans-serif; font-weight:500; font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(0,0,0,0.09); pointer-events:none; user-select:none; z-index:4; }
 
     .artwork-node { position:absolute; transform:translate(-50%,-50%); border-radius:6px; overflow:hidden; cursor:pointer; will-change:transform,left,top,opacity,width,height; }
@@ -1196,6 +1196,7 @@ function DetailPanel({ artwork, allArtworks, presetItem, onClose }) {
 function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
   const [temperature,setTemperature] = useState(initialTemperature??0.62);
   const [zoom,setZoom]               = useState(1);
+  const [failedIds,setFailedIds]     = useState(new Set());
   const [hoveredId,setHoveredId]     = useState(null);
   const [selectedId,setSelectedId]   = useState(null);
   const [tooltipPos,setTooltipPos]   = useState({ x:0,y:0 });
@@ -1212,6 +1213,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
   const pickerBtnRef = useRef(null);
   const dragStart    = useRef(null);
   const canvasRef    = useRef(null);
+  const zoomRef      = useRef(1);
 
   useEffect(()=>{ const t=setTimeout(()=>setLoaded(true),80); return()=>clearTimeout(t); },[]);
   useEffect(()=>{
@@ -1261,19 +1263,30 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
     return m;
   },[activePreset]);
 
-  // Grid positions for focused (low-temperature) state — evenly distributed, no overlap
-  const visibleCount = Math.max(3,Math.round(3+temperature*(ARTWORKS.length-3)));
-  const visibleSet = (() => {
+  const visibleSet = useMemo(()=>{
     if (activePreset) {
-      // Sort by x ascending: exact semantic (low x) → sensory → exploratory (high x)
       const sorted = [...activePreset].sort((a,b) => a.x - b.x);
-      // t=0: 3 most exact matches; t=1: all results
       const minShow = Math.min(3, sorted.length);
       const count = Math.round(minShow + temperature * (sorted.length - minShow));
       return new Set(sorted.slice(0, Math.max(minShow, count)).map(p => p.id));
     }
-    return new Set(scoredArtworks.slice(0, visibleCount).map(a => a.id));
-  })();
+    const vc = Math.max(3, Math.round(3 + temperature * (ARTWORKS.length - 3)));
+    return new Set(scoredArtworks.slice(0, vc).map(a => a.id));
+  }, [activePreset, temperature, scoredArtworks]);
+
+  // Pan to centroid of visible items so they're always in view
+  useEffect(()=>{
+    const items = ARTWORKS.filter(a => visibleSet.has(a.id));
+    if (!items.length || !canvasRef.current) return;
+    const pb = presetById;
+    const avgX = items.reduce((s,a) => s + (pb?.[a.id]?.x ?? a.spreadX), 0) / items.length;
+    const avgY = items.reduce((s,a) => s + (pb?.[a.id]?.y ?? a.spreadY), 0) / items.length;
+    const W = canvasRef.current.offsetWidth;
+    const H = canvasRef.current.offsetHeight;
+    setPan({ x: (0.5 - avgX/100) * zoomRef.current * W, y: (0.5 - avgY/100) * zoomRef.current * H });
+  }, [visibleSet]);
+
+  zoomRef.current = zoom;
   const rankById = Object.fromEntries(scoredArtworks.map((a,i)=>[a.id,i]));
   const hoveredArtwork  = ARTWORKS.find(a=>a.id===hoveredId)||null;
   const selectedArtwork = ARTWORKS.find(a=>a.id===selectedId)||null;
@@ -1322,7 +1335,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
         <div style={{ position:'absolute',inset:0,pointerEvents:'none',zIndex:1,background:`radial-gradient(ellipse 40% 30% at 50% 0%,rgba(147,197,253,0.06) 0%,transparent 100%),radial-gradient(ellipse 40% 30% at 50% 100%,rgba(254,202,202,0.06) 0%,transparent 100%),radial-gradient(ellipse 20% 50% at 0% 50%,rgba(196,181,253,0.06) 0%,transparent 100%),radial-gradient(ellipse 20% 50% at 100% 50%,rgba(253,230,138,0.06) 0%,transparent 100%)` }} />
 
         {/* ── Pan + zoom layer — axes + artworks all move together ── */}
-        <div className="canvas-inner" style={{ transform:`translate(${pan.x}px,${pan.y}px) scale(${zoom})`,transformOrigin:'center center',transition:isDragging?'none':'transform 0.25s cubic-bezier(0.16,1,0.3,1)',zIndex:2 }}>
+        <div className="canvas-inner" style={{ transform:`translate(${pan.x}px,${pan.y}px) scale(${zoom})`,transformOrigin:'center center',transition:isDragging?'none':'transform 0.65s cubic-bezier(0.16,1,0.3,1)',zIndex:2 }}>
           {/* Axis lines — world-space, pan with artworks */}
           <div className="axis-center-x" />
           <div className="axis-center-y" />
@@ -1331,7 +1344,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
             const x = preset ? preset.x : artwork.spreadX;
             const y = preset ? preset.y : artwork.spreadY;
             const size=artwork.baseSize;
-            const isVisible=visibleSet.has(artwork.id), isHovered=artwork.id===hoveredId, isSelected=artwork.id===selectedId;
+            const isVisible=visibleSet.has(artwork.id)&&!failedIds.has(artwork.id), isHovered=artwork.id===hoveredId, isSelected=artwork.id===selectedId;
             const rank=rankById[artwork.id]??i;
             const finalOp=loaded&&isVisible?1:0;
             return (
@@ -1358,7 +1371,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
                 onClick={()=>{ if(!isDragging) setSelectedId(s=>s===artwork.id?null:artwork.id); }}
               >
                 <img src={artwork.img} alt={artwork.title}
-                  onError={e=>{ e.target.src=`https://picsum.photos/seed/${artwork.id+50}/400/400`; }} />
+                  onError={()=>{ setFailedIds(s=>{ const n=new Set(s); n.add(artwork.id); return n; }); }} />
               </div>
             );
           })}
