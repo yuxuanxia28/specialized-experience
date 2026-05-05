@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NGA — Artwork Explorer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -11,8 +11,7 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-    html, body { width:100%; height:100%; overscroll-behavior:none; }
-    body { font-family:'Inter',sans-serif; background:#111; overflow:hidden; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+    body { font-family:'Inter',sans-serif; background:#111; overflow:hidden; -webkit-font-smoothing:antialiased; }
 
     @keyframes blob1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(60px,-40px) scale(1.12)} 66%{transform:translate(-30px,50px) scale(0.92)} }
     @keyframes blob2 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(-70px,30px) scale(0.9)} 66%{transform:translate(40px,-60px) scale(1.08)} }
@@ -166,106 +165,11 @@
     .similar-card-title { font-size:8px; font-weight:500; color:#111; padding:6px 8px 2px; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .similar-card-artist { font-size:6px; color:#9ca3af; padding:0 8px 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-    /* ── Info modal mobile layout — hidden on desktop, shown on mobile ── */
-    .mobile-info-body { display:none; }
-
-    /* ── Mobile info button (desktop: pill with text; mobile: icon-only via media query) ── */
-    .mobile-info-btn { display:inline-flex; align-items:center; gap:7px; background:#fff; border:1.5px solid #d1d5dc; border-radius:999px; padding:9px 16px; cursor:pointer; color:#858585; font-family:Inter,sans-serif; font-size:13px; letter-spacing:-0.01em; transition:background 0.15s,border-color 0.15s; white-space:nowrap; flex-shrink:0; position:absolute; right:24px; top:50%; transform:translateY(-50%); }
-    .mobile-info-btn:hover { background:#f9fafb; }
-
-    /* ── Mobile (≤600px) ── */
     @media (max-width:600px) {
-      body { background:#050505; }
-      .landing-screen { justify-content:flex-start; padding:calc(env(safe-area-inset-top) + 116px) 22px calc(env(safe-area-inset-bottom) + 32px); }
-      .landing-content { width:100%; min-height:calc(100svh - 168px); justify-content:center; }
-      .landing-eyebrow { font-size:13px; margin-bottom:12px; color:rgba(255,255,255,0.52); }
-      .show-me-row { width:100%; max-width:none; display:flex; flex-wrap:wrap; justify-content:center; gap:6px 8px; font-size:28px; line-height:1.12; text-align:center; letter-spacing:-0.035em; }
-      .show-me-typed, .show-me-placeholder { white-space:normal; overflow-wrap:anywhere; }
-      .tick-slider-wrap { width:100%; margin-top:72px; }
-      .tick-track { height:36px; }
-      .tick-thumb { width:28px; height:28px; }
-      .tick-labels { font-size:11px; padding:0 2px; }
-      .tick-bubble { top:-34px; }
-      .find-btn { margin-top:30px; width:min(240px,80vw); height:54px; justify-content:center; font-size:17px; padding:0 24px; touch-action:manipulation; }
-
-      .screen-enter { min-height:100svh; }
-      .screen-enter > header { height:calc(116px + env(safe-area-inset-top)) !important; padding:calc(env(safe-area-inset-top) + 14px) 14px 12px !important; align-items:flex-end !important; justify-content:center !important; gap:10px !important; }
-      .screen-enter > header > button:first-child { left:14px !important; top:calc(env(safe-area-inset-top) + 14px) !important; width:42px !important; height:42px !important; padding:0 !important; border-radius:999px !important; transform:none !important; font-size:0 !important; justify-content:center !important; background:#fff !important; }
-      .screen-enter > header > button:first-child svg { width:18px; height:18px; }
-      .screen-enter > header > div { width:100% !important; max-width:none !important; align-self:flex-end !important; }
-      .mobile-info-btn { position:absolute; right:14px; top:calc(env(safe-area-inset-top) + 14px); width:42px; height:42px; padding:0; border-radius:999px; transform:none; font-size:0; justify-content:center; }
-      .mobile-info-btn svg { width:18px; height:18px; }
-      .search-input { width:100% !important; height:48px; padding:12px 14px 12px 44px; font-size:14px; border-radius:999px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
-      .search-input::placeholder { color:rgba(10,10,10,0.42); }
-
-      .canvas-root { touch-action:none; cursor:grab; }
-      .axis-label { font-size:11px; line-height:16px; padding:5px 9px; border-radius:999px; background:rgba(255,255,255,0.5); }
-      .quad-label { font-size:7px; letter-spacing:0.1em; color:rgba(0,0,0,0.12); }
-      .artwork-node { border-radius:8px; }
-      .artwork-node img { border-radius:8px; }
-      .tooltip { display:none; }
-
-      .canvas-root > div[style*="top:24"] { top:auto !important; right:12px !important; bottom:16px !important; flex-direction:row !important; background:rgba(255,255,255,0.76) !important; border:1px solid rgba(209,213,220,0.9) !important; border-radius:999px !important; padding:6px !important; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); box-shadow:0 14px 34px rgba(0,0,0,0.16); }
-      .canvas-root > div[style*="top:24"] > div { display:none !important; }
-      .btn { width:44px; height:44px; border-radius:999px; box-shadow:none; }
-
-      .screen-enter > footer { height:calc(112px + env(safe-area-inset-bottom)) !important; padding:18px 20px calc(env(safe-area-inset-bottom) + 34px) !important; justify-content:center !important; }
-      .screen-enter > footer .tick-slider-wrap { width:100% !important; margin:0 !important; }
-      .screen-enter > footer .tick-track { height:30px; }
-      .screen-enter > footer .tick-thumb { width:24px; height:24px; }
-
-      .detail-overlay { background:rgba(17,24,39,0.26); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
-      .detail-panel { flex-direction:column; left:0; right:0; top:auto; bottom:0; width:100vw; height:min(86svh,760px); border-radius:22px 22px 0 0; border-left:0; border-right:0; border-bottom:0; transform:none; animation:mobileSheetIn 0.28s cubic-bezier(0.22,1,0.36,1) both; }
-      .detail-panel::before { content:""; position:absolute; top:8px; left:50%; width:42px; height:4px; border-radius:999px; background:#d1d5dc; transform:translateX(-50%); z-index:3; }
-      .detail-img-col { width:100%; height:34%; min-height:190px; border-right:none; border-bottom:1px solid #e5e7eb; padding:14px 14px 10px; }
-      .detail-img-col img { border-radius:14px; }
-      .detail-info-header { padding:16px 16px 12px; gap:10px; }
-      .detail-title { font-size:16px; line-height:1.25; }
-      .detail-artist { font-size:12px; }
-      .detail-meta-line { font-size:10px; flex-wrap:wrap; row-gap:3px; }
-      .detail-close { width:38px; height:38px; padding:0; justify-content:center; font-size:0; }
-      .detail-close svg { width:13px; height:13px; }
-      .detail-body { padding:14px 16px calc(env(safe-area-inset-bottom) + 20px); }
-      .detail-desc { font-size:13px; line-height:1.62; }
-      .why-text { font-size:12px; line-height:1.6; }
-      .detail-cta { min-height:44px; border-radius:999px; }
-      .similar-card { width:148px; border-radius:10px; }
-      .similar-card img { width:148px; height:88px; }
-
-      .mobile-info-body { display:flex; }
-      .info-diagram > *:not(.mobile-info-body) { display:none !important; }
-      .info-overlay { position:fixed; background:rgba(17,24,39,0.32) !important; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
-      .info-modal { left:14px !important; right:14px !important; top:calc(env(safe-area-inset-top) + 52px) !important; bottom:24px !important; width:auto !important; height:auto !important; transform:none !important; border-radius:24px !important; overflow:auto !important; -webkit-overflow-scrolling:touch; }
-      .info-modal-header { padding:22px 18px 14px !important; position:sticky; top:0; background:#fff; z-index:2; border-bottom:1px solid #f3f4f6; }
-      .info-modal-title { max-width:none !important; font-size:17px !important; line-height:1.25 !important; }
-      .info-modal-close { width:36px !important; height:36px !important; padding:0 !important; justify-content:center !important; font-size:0 !important; }
-      .info-modal-close svg { width:13px; height:13px; }
-      .mobile-info-body { padding:16px; display:flex; flex-direction:column; gap:16px; }
-      .mobile-axis-top, .mobile-axis-bottom { text-align:center; }
-      .mobile-axis-kicker { font-size:10px; color:#858585; line-height:1.2; margin:0 0 3px; }
-      .mobile-axis-label { font-size:13px; font-weight:500; color:#000; margin:0; }
-      .mobile-axis-row { display:grid; grid-template-columns:38px 1fr 38px; align-items:center; gap:8px; }
-      .mobile-side-axis { display:flex; align-items:center; justify-content:center; min-height:180px; }
-      .mobile-side-axis span { writing-mode:vertical-rl; font-size:13px; font-weight:500; color:#000; }
-      .mobile-side-axis:first-child span { transform:rotate(180deg); }
-      .mobile-quadrant-grid { display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; min-height:180px; border:1.5px solid #d1d5dc; border-radius:18px; overflow:hidden; }
-      .mobile-quadrant { position:relative; display:flex; flex-direction:column; justify-content:center; gap:6px; padding:12px 10px; }
-      .mobile-quadrant:nth-child(1) { background:#e8f5e9; border-right:1px solid #d1d5dc; border-bottom:1px solid #d1d5dc; }
-      .mobile-quadrant:nth-child(2) { background:#e1f5fe; border-bottom:1px solid #d1d5dc; }
-      .mobile-quadrant:nth-child(3) { background:#fff3e0; border-right:1px solid #d1d5dc; }
-      .mobile-quadrant:nth-child(4) { background:#fce4ec; }
-      .mobile-quadrant-num { position:absolute; top:8px; right:9px; font-size:9px; color:#919191; }
-      .mobile-quadrant-title { font-size:12px; line-height:1.15; font-weight:600; color:rgba(0,0,0,0.62); margin:0; }
-      .mobile-quadrant-copy { font-size:9.5px; line-height:1.35; color:#111; margin:0; }
-      .mobile-info-cards { display:flex; flex-direction:column; gap:8px; }
-      .mobile-info-card { border:1px solid #e5e7eb; border-radius:14px; padding:12px; background:#fff; }
-      .mobile-info-card h3 { font-size:13px; line-height:1.2; margin:0 0 5px; color:#111; }
-      .mobile-info-card p { font-size:11.5px; line-height:1.5; margin:0; color:#5f6875; }
-    }
-
-    @keyframes mobileSheetIn {
-      from { opacity:0; transform:translateY(100%); }
-      to { opacity:1; transform:translateY(0); }
+      .find-btn { font-size:16px; padding:12px 22px; }
+      .search-input { width:calc(100vw - 140px); font-size:13px; }
+      .detail-panel { flex-direction:column; width:96vw; height:90vh; border-radius:16px; }
+      .detail-img-col { width:100%; height:200px; border-right:none; border-bottom:1px solid #e5e7eb; }
     }
   </style>
 </head>
@@ -1288,105 +1192,6 @@ function DetailPanel({ artwork, allArtworks, presetItem, onClose }) {
   );
 }
 
-// ─── Info Modal ───────────────────────────────────────────────────────────────
-function InfoModal({ onClose }) {
-  return (
-    <>
-      <div className="info-overlay" style={{ position:'fixed',inset:0,zIndex:400,background:'rgba(0,0,0,0.5)' }} onClick={onClose} />
-      <div className="info-modal" style={{ position:'fixed',left:'50%',top:'50%',transform:'translate(-50%,-50%)',zIndex:401,width:'min(1060px,95vw)',height:'min(700px,90vh)',background:'#fff',borderRadius:20,border:'1.5px solid #d1d5dc',boxShadow:'0 25px 50px -12px rgba(0,0,0,0.22)',display:'flex',flexDirection:'column',overflow:'hidden' }}>
-        <div className="info-modal-header" style={{ flexShrink:0,padding:'28px 32px 18px',display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:20 }}>
-          <p className="info-modal-title" style={{ fontFamily:'Inter,sans-serif',fontSize:20,fontWeight:300,color:'#000',lineHeight:1.2,margin:0,maxWidth:380,letterSpacing:'-0.01em' }}>
-            Around the space, there are <strong style={{ fontWeight:700 }}>four</strong> directional relationship types.
-          </p>
-          <button className="info-modal-close" onClick={onClose} style={{ display:'inline-flex',alignItems:'center',gap:4,flexShrink:0,background:'#fff',border:'1.5px solid #d1d5dc',borderRadius:999,padding:'8px 16px 8px 12px',cursor:'pointer',fontFamily:'Inter,sans-serif',fontSize:14,color:'#858585',letterSpacing:'-0.01em',transition:'background 0.15s',whiteSpace:'nowrap' }}
-            onMouseEnter={e=>e.currentTarget.style.background='#f9fafb'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-            Close
-          </button>
-        </div>
-
-        {/* Desktop diagram (hidden on mobile via mobile-info-body replacing it) */}
-        <div className="info-diagram" style={{ flex:1,minHeight:0,padding:'0 24px 20px',display:'flex',flexDirection:'column',overflowY:'auto' }}>
-          <div style={{ flexShrink:0,textAlign:'center',marginBottom:5 }}>
-            <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:300,color:'#777',margin:'0 0 2px',lineHeight:1.1 }}>mainstream, iconic, personal history</p>
-            <p style={{ fontFamily:'Inter,sans-serif',fontSize:15,fontWeight:500,color:'#000',margin:0,lineHeight:1.1 }}>Familiar</p>
-          </div>
-          <div style={{ flex:1,minHeight:0,display:'flex',alignItems:'stretch',gap:10 }}>
-            <div style={{ flexShrink:0,width:108,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:10 }}>
-              <p style={{ fontFamily:'Inter,sans-serif',fontSize:12,fontWeight:300,color:'#777',textAlign:'center',margin:0,lineHeight:1.3 }}>direct name match, surface level</p>
-              <p style={{ fontFamily:'Inter,sans-serif',fontSize:14,fontWeight:500,color:'#000',margin:0,writingMode:'vertical-rl',transform:'rotate(180deg)',letterSpacing:'0.01em' }}>Semantic</p>
-            </div>
-            <div style={{ flex:1,display:'grid',gridTemplateColumns:'1fr 1fr',gridTemplateRows:'1fr 1fr',border:'1.5px solid #d1d5dc',borderRadius:20,overflow:'hidden' }}>
-              <div style={{ background:'#e8f5e9',borderRight:'0.75px solid #d1d5dc',borderBottom:'0.75px solid #d1d5dc',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',padding:14 }}>
-                <span style={{ position:'absolute',bottom:10,left:16,fontFamily:'Inter,sans-serif',fontSize:11,fontWeight:300,color:'#919191',letterSpacing:'-0.01em' }}>Quadrant II</span>
-                <div style={{ border:'1px solid rgba(0,0,0,0.1)',borderRadius:10,padding:'14px 16px',display:'flex',alignItems:'center',gap:14,maxWidth:380 }}>
-                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:600,color:'rgba(0,0,0,0.5)',margin:0,width:110,textAlign:'center',lineHeight:1.2,flexShrink:0 }}>Curated Canon</p>
-                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:10,fontWeight:300,color:'#000',margin:0,lineHeight:1.5 }}>Iconic artworks and more <strong style={{ fontWeight:700 }}>traditionally matching artworks</strong> (direct matches)</p>
-                </div>
-              </div>
-              <div style={{ background:'#e1f5fe',borderBottom:'0.75px solid #d1d5dc',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',padding:14 }}>
-                <span style={{ position:'absolute',bottom:10,right:16,fontFamily:'Inter,sans-serif',fontSize:11,fontWeight:300,color:'#919191',letterSpacing:'-0.01em' }}>Quadrant I</span>
-                <div style={{ border:'1px solid rgba(0,0,0,0.1)',borderRadius:10,padding:'14px 16px',display:'flex',alignItems:'center',gap:14,maxWidth:380 }}>
-                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:600,color:'rgba(0,0,0,0.5)',margin:0,width:110,textAlign:'center',lineHeight:1.2,flexShrink:0 }}>Moodboard</p>
-                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:10,fontWeight:300,color:'#000',margin:0,lineHeight:1.5 }}>Popular trends and <strong style={{ fontWeight:700 }}>visually or stylistically matching artworks</strong></p>
-                </div>
-              </div>
-              <div style={{ background:'#fff3e0',borderRight:'0.75px solid #d1d5dc',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',padding:14 }}>
-                <span style={{ position:'absolute',top:10,left:16,fontFamily:'Inter,sans-serif',fontSize:11,fontWeight:300,color:'#919191',letterSpacing:'-0.01em' }}>Quadrant III</span>
-                <div style={{ border:'1px solid rgba(0,0,0,0.1)',borderRadius:10,padding:'14px 16px',display:'flex',alignItems:'center',gap:14,maxWidth:380 }}>
-                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:600,color:'rgba(0,0,0,0.5)',margin:0,width:110,textAlign:'center',lineHeight:1.2,flexShrink:0 }}>Niche Deep-Dive</p>
-                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:10,fontWeight:300,color:'#000',margin:0,lineHeight:1.5 }}>Rare archival works ideal for deeper research</p>
-                </div>
-              </div>
-              <div style={{ background:'#fce4ec',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',padding:14 }}>
-                <span style={{ position:'absolute',top:10,right:16,fontFamily:'Inter,sans-serif',fontSize:11,fontWeight:300,color:'#919191',letterSpacing:'-0.01em' }}>Quadrant IV</span>
-                <div style={{ border:'1px solid rgba(0,0,0,0.1)',borderRadius:10,padding:'14px 16px',display:'flex',alignItems:'center',gap:14,maxWidth:380 }}>
-                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:600,color:'rgba(0,0,0,0.5)',margin:0,width:110,textAlign:'center',lineHeight:1.2,flexShrink:0 }}>Hidden Gems</p>
-                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:10,fontWeight:300,color:'#000',margin:0,lineHeight:1.5 }}>Purely visual discovery highlighting <strong style={{ fontWeight:700 }}>unexpected</strong> artworks</p>
-                </div>
-              </div>
-            </div>
-            <div style={{ flexShrink:0,width:108,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:10 }}>
-              <p style={{ fontFamily:'Inter,sans-serif',fontSize:14,fontWeight:500,color:'#000',margin:0,writingMode:'vertical-rl',letterSpacing:'0.01em' }}>Sensory</p>
-              <p style={{ fontFamily:'Inter,sans-serif',fontSize:12,fontWeight:300,color:'#777',textAlign:'center',margin:0,lineHeight:1.3 }}>visual experience, color, mood</p>
-            </div>
-          </div>
-          <div style={{ flexShrink:0,textAlign:'center',marginTop:5 }}>
-            <p style={{ fontFamily:'Inter,sans-serif',fontSize:15,fontWeight:500,color:'#000',margin:'0 0 2px',lineHeight:1.1 }}>Novel</p>
-            <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:300,color:'#777',margin:0,lineHeight:1.1 }}>undiscovered, obscure, niche</p>
-          </div>
-
-          {/* Mobile-friendly layout (shown via CSS on small screens) */}
-          <div className="mobile-info-body">
-            <div className="mobile-axis-top">
-              <p className="mobile-axis-kicker">mainstream, iconic, personal history</p>
-              <p className="mobile-axis-label">Familiar</p>
-            </div>
-            <div className="mobile-axis-row">
-              <div className="mobile-side-axis"><span>Semantic</span></div>
-              <div className="mobile-quadrant-grid">
-                <section className="mobile-quadrant"><span className="mobile-quadrant-num">II</span><p className="mobile-quadrant-title">Curated Canon</p><p className="mobile-quadrant-copy">Iconic artworks and traditional direct matches.</p></section>
-                <section className="mobile-quadrant"><span className="mobile-quadrant-num">I</span><p className="mobile-quadrant-title">Moodboard</p><p className="mobile-quadrant-copy">Popular, visual, color, mood, and style matches.</p></section>
-                <section className="mobile-quadrant"><span className="mobile-quadrant-num">III</span><p className="mobile-quadrant-title">Niche Deep-Dive</p><p className="mobile-quadrant-copy">Rare archival works for deeper research.</p></section>
-                <section className="mobile-quadrant"><span className="mobile-quadrant-num">IV</span><p className="mobile-quadrant-title">Hidden Gems</p><p className="mobile-quadrant-copy">Unexpected works surfaced through visual discovery.</p></section>
-              </div>
-              <div className="mobile-side-axis"><span>Sensory</span></div>
-            </div>
-            <div className="mobile-axis-bottom">
-              <p className="mobile-axis-label">Novel</p>
-              <p className="mobile-axis-kicker">undiscovered, obscure, niche</p>
-            </div>
-            <div className="mobile-info-cards">
-              <div className="mobile-info-card"><h3>Semantic to Sensory</h3><p>Left-side results are direct title or subject matches. Right-side results are visual matches based on color, atmosphere, material, and mood.</p></div>
-              <div className="mobile-info-card"><h3>Familiar to Novel</h3><p>Top results lean recognizable and iconic. Lower results are less obvious works that would usually be buried by popularity-based ranking.</p></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
 // ─── Exploratory Canvas ───────────────────────────────────────────────────────
 function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
   const [temperature,setTemperature] = useState(initialTemperature??0.62);
@@ -1407,7 +1212,6 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
 
   const pickerBtnRef = useRef(null);
   const dragStart    = useRef(null);
-  const touchStart   = useRef(null);
   const canvasRef    = useRef(null);
   const zoomRef      = useRef(1);
 
@@ -1427,19 +1231,6 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
   const handleMouseDown = e=>{ if(e.target.closest('.artwork-node')||e.target.closest('.btn'))return; setIsDragging(true); dragStart.current={x:e.clientX-pan.x,y:e.clientY-pan.y}; e.preventDefault(); };
   const handleMouseMove = useCallback(e=>{ if(!isDragging||!dragStart.current)return; setPan({x:e.clientX-dragStart.current.x,y:e.clientY-dragStart.current.y}); },[isDragging]);
   const handleMouseUp   = ()=>{ setIsDragging(false); dragStart.current=null; };
-  const touchDistance = touches => { const [a,b]=touches; return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY); };
-  const handleTouchStart = e=>{
-    if(e.target.closest('.artwork-node')||e.target.closest('.btn')) return;
-    if(e.touches.length===1){ const t=e.touches[0]; touchStart.current={mode:'pan',x:t.clientX-pan.x,y:t.clientY-pan.y}; setIsDragging(true); }
-    if(e.touches.length===2){ touchStart.current={mode:'pinch',distance:touchDistance(e.touches),zoom}; setIsDragging(true); }
-  };
-  const handleTouchMove = e=>{
-    if(!touchStart.current) return;
-    e.preventDefault();
-    if(touchStart.current.mode==='pan'&&e.touches.length===1){ const t=e.touches[0]; setPan({x:t.clientX-touchStart.current.x,y:t.clientY-touchStart.current.y}); }
-    if(touchStart.current.mode==='pinch'&&e.touches.length===2){ setZoom(clamp(touchStart.current.zoom*(touchDistance(e.touches)/touchStart.current.distance),0.4,3)); }
-  };
-  const handleTouchEnd = ()=>{ if(!touchStart.current)return; touchStart.current=null; setIsDragging(false); };
 
   const addCustomTag    = (id,tag) => setCustomTagsMap(p=>({...p,[id]:[...(p[id]||[]),tag]}));
   const removeCustomTag = (id,tag) => setCustomTagsMap(p=>({...p,[id]:(p[id]||[]).filter(t=>t!==tag)}));
@@ -1503,29 +1294,29 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
   const HEADER_H=87, FOOTER_H=100;
 
   return (
-    <div className="screen-enter" style={{ width:'100%',height:'100%',display:'flex',flexDirection:'column',overflow:'hidden' }}>
+    <div className="screen-enter" style={{ width:'100vw',height:'100vh',display:'flex',flexDirection:'column',overflow:'hidden' }}>
 
       {/* Header */}
       <header style={{ height:HEADER_H,flexShrink:0,background:'#fff',borderBottom:'1px solid #e5e7eb',display:'flex',alignItems:'center',justifyContent:'center',paddingBottom:1,position:'relative',zIndex:20 }}>
-        <button onClick={onBack} style={{ position:'absolute',left:24,top:'50%',transform:'translateY(-50%)',display:'flex',alignItems:'center',gap:6,background:'none',border:'1px solid #e5e7eb',borderRadius:10,padding:'8px 14px',cursor:'pointer',color:'#374151',fontFamily:'Inter,sans-serif',fontSize:13,letterSpacing:'-0.01em',transition:'background 0.15s' }} onMouseEnter={e=>e.currentTarget.style.background='#f9fafb'} onMouseLeave={e=>e.currentTarget.style.background='none'}>
+        <button onClick={onBack} style={{ position:'absolute',left:24,top:'50%',transform:'translateY(-50%)',display:'flex',alignItems:'center',gap:6,background:'none',border:'1px solid #e5e7eb',borderRadius:10,padding:'8px 14px',cursor:'pointer',color:'#374151',fontFamily:'Inter,sans-serif',fontSize:13,letterSpacing:'-0.01em',transition:'background 0.15s' }} onMouseEnter={e=>e.currentTarget.style.background='#f9fafb'} onMouseLeave={e=>e.currentTarget.style.background='none'} onMouseDown={e=>e.currentTarget.style.transform='translateY(-50%) scale(0.95)'} onMouseUp={e=>e.currentTarget.style.transform='translateY(-50%) scale(1)'}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8L10 4" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           Back
         </button>
-        <div className="mobile-search-wrap" style={{ position:'relative',display:'flex',alignItems:'center' }}>
+        <div style={{ position:'relative',display:'flex',alignItems:'center' }}>
           <svg style={{ position:'absolute',left:16,top:'50%',transform:'translateY(-50%)',width:20,height:20,pointerEvents:'none' }} viewBox="0 0 20 20" fill="none"><circle cx="8.5" cy="8.5" r="5" stroke="#9ca3af" strokeWidth="1.5"/><path d="M13 13L17 17" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round"/></svg>
           <input className="search-input" type="text" placeholder='Search by word, feeling, or idea (e.g. flowers, sky, cat)' value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} />
         </div>
-        <button className="mobile-info-btn" onClick={()=>setShowInfo(true)} title="What am I looking at?">
+        <button onClick={()=>setShowInfo(true)} style={{ position:'absolute',right:24,top:'50%',transform:'translateY(-50%)',display:'flex',alignItems:'center',gap:7,background:'#fff',border:'1.5px solid #d1d5dc',borderRadius:999,padding:'9px 16px',cursor:'pointer',color:'#858585',fontFamily:'Inter,sans-serif',fontSize:13,letterSpacing:'-0.01em',transition:'background 0.15s,border-color 0.15s',whiteSpace:'nowrap',flexShrink:0 }}
+          onMouseEnter={e=>e.currentTarget.style.background='#f9fafb'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="6.25" stroke="currentColor" strokeWidth="1.35"/><path d="M7.5 6.5v4M7.5 4.75v-.5" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round"/></svg>
-          <span>What am I looking at?</span>
+          What am I looking at?
         </button>
       </header>
 
 
       {/* Canvas */}
       <div ref={canvasRef} className="canvas-root" style={{ flex:1,cursor:isDragging?'grabbing':'grab',userSelect:'none' }}
-        onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd}>
+        onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
 
         {/* ── Viewport-fixed quadrant labels ── */}
         <span className="quad-label" style={{ top:18,left:18 }}>Education</span>
@@ -1638,7 +1429,101 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
       )}
 
       {/* Info modal */}
-      {showInfo && <InfoModal onClose={()=>setShowInfo(false)} />}
+      {showInfo && (
+        <>
+          <div style={{ position:'fixed',inset:0,zIndex:400,background:'rgba(0,0,0,0.5)' }} onClick={()=>setShowInfo(false)} />
+          <div style={{ position:'fixed',left:'50%',top:'50%',transform:'translate(-50%,-50%)',zIndex:401,width:'min(1060px,95vw)',height:'min(700px,90vh)',background:'#fff',borderRadius:20,border:'1.5px solid #d1d5dc',boxShadow:'0 25px 50px -12px rgba(0,0,0,0.22)',display:'flex',flexDirection:'column',overflow:'hidden' }}>
+
+            {/* Header: title + close */}
+            <div style={{ flexShrink:0,padding:'28px 32px 18px',display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:20 }}>
+              <p style={{ fontFamily:'Inter,sans-serif',fontSize:20,fontWeight:300,color:'#000',lineHeight:1.2,margin:0,maxWidth:380,letterSpacing:'-0.01em' }}>
+                Around the space, there are <strong style={{ fontWeight:700 }}>four</strong> directional relationship types.
+              </p>
+              <button onClick={()=>setShowInfo(false)} style={{ display:'inline-flex',alignItems:'center',gap:4,flexShrink:0,background:'#fff',border:'1.5px solid #d1d5dc',borderRadius:999,padding:'8px 16px 8px 12px',cursor:'pointer',fontFamily:'Inter,sans-serif',fontSize:14,color:'#858585',letterSpacing:'-0.01em',transition:'background 0.15s',whiteSpace:'nowrap' }}
+                onMouseEnter={e=>e.currentTarget.style.background='#f9fafb'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                Close
+              </button>
+            </div>
+
+            {/* Diagram area */}
+            <div style={{ flex:1,minHeight:0,padding:'0 24px 20px',display:'flex',flexDirection:'column' }}>
+
+              {/* Familiar top labels */}
+              <div style={{ flexShrink:0,textAlign:'center',marginBottom:5 }}>
+                <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:300,color:'#777',margin:'0 0 2px',lineHeight:1.1 }}>mainstream, iconic, personal history</p>
+                <p style={{ fontFamily:'Inter,sans-serif',fontSize:15,fontWeight:500,color:'#000',margin:0,lineHeight:1.1 }}>Familiar</p>
+              </div>
+
+              {/* Middle: Semantic | grid | Sensory */}
+              <div style={{ flex:1,minHeight:0,display:'flex',alignItems:'stretch',gap:10 }}>
+
+                {/* Left: Semantic */}
+                <div style={{ flexShrink:0,width:108,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:10 }}>
+                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:12,fontWeight:300,color:'#777',textAlign:'center',margin:0,lineHeight:1.3 }}>direct name match, surface level</p>
+                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:14,fontWeight:500,color:'#000',margin:0,writingMode:'vertical-rl',transform:'rotate(180deg)',letterSpacing:'0.01em' }}>Semantic</p>
+                </div>
+
+                {/* 2×2 colored grid */}
+                <div style={{ flex:1,display:'grid',gridTemplateColumns:'1fr 1fr',gridTemplateRows:'1fr 1fr',border:'1.5px solid #d1d5dc',borderRadius:20,overflow:'hidden' }}>
+
+                  {/* TL: Curated Canon — Familiar + Semantic — green */}
+                  <div style={{ background:'#e8f5e9',borderRight:'0.75px solid #d1d5dc',borderBottom:'0.75px solid #d1d5dc',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',padding:14 }}>
+                    <span style={{ position:'absolute',bottom:10,left:16,fontFamily:'Inter,sans-serif',fontSize:11,fontWeight:300,color:'#919191',letterSpacing:'-0.01em' }}>Quadrant II</span>
+                    <div style={{ border:'1px solid rgba(0,0,0,0.1)',borderRadius:10,padding:'14px 16px',display:'flex',alignItems:'center',gap:14,maxWidth:380 }}>
+                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:600,color:'rgba(0,0,0,0.5)',margin:0,width:110,textAlign:'center',lineHeight:1.2,flexShrink:0 }}>Curated Canon</p>
+                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:10,fontWeight:300,color:'#000',margin:0,lineHeight:1.5 }}>This quadrant will consist of <strong style={{ fontWeight:700 }}>iconic artworks</strong> and more <strong style={{ fontWeight:700 }}>traditionally matching artworks</strong> (direct matches)</p>
+                    </div>
+                  </div>
+
+                  {/* TR: Moodboard — Familiar + Sensory — blue */}
+                  <div style={{ background:'#e1f5fe',borderBottom:'0.75px solid #d1d5dc',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',padding:14 }}>
+                    <span style={{ position:'absolute',bottom:10,right:16,fontFamily:'Inter,sans-serif',fontSize:11,fontWeight:300,color:'#919191',letterSpacing:'-0.01em' }}>Quadrant I</span>
+                    <div style={{ border:'1px solid rgba(0,0,0,0.1)',borderRadius:10,padding:'14px 16px',display:'flex',alignItems:'center',gap:14,maxWidth:380 }}>
+                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:600,color:'rgba(0,0,0,0.5)',margin:0,width:110,textAlign:'center',lineHeight:1.2,flexShrink:0 }}>Moodboard</p>
+                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:10,fontWeight:300,color:'#000',margin:0,lineHeight:1.5 }}>This quadrant will consist of <strong style={{ fontWeight:700 }}>popular trends</strong> and <strong style={{ fontWeight:700 }}>visually or stylistically matching artworks</strong> (vibe-based matches)</p>
+                    </div>
+                  </div>
+
+                  {/* BL: Niche Deep-Dive — Novel + Semantic — orange */}
+                  <div style={{ background:'#fff3e0',borderRight:'0.75px solid #d1d5dc',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',padding:14 }}>
+                    <span style={{ position:'absolute',top:10,left:16,fontFamily:'Inter,sans-serif',fontSize:11,fontWeight:300,color:'#919191',letterSpacing:'-0.01em' }}>Quadrant III</span>
+                    <div style={{ border:'1px solid rgba(0,0,0,0.1)',borderRadius:10,padding:'14px 16px',display:'flex',alignItems:'center',gap:14,maxWidth:380 }}>
+                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:600,color:'rgba(0,0,0,0.5)',margin:0,width:110,textAlign:'center',lineHeight:1.2,flexShrink:0 }}>Niche Deep-Dive</p>
+                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:10,fontWeight:300,color:'#000',margin:0,lineHeight:1.5 }}>This quadrant will consist of <strong style={{ fontWeight:700 }}>rare archival works</strong> and is ideal for deeper, in-depth research</p>
+                    </div>
+                  </div>
+
+                  {/* BR: Hidden Gems — Novel + Sensory — pink */}
+                  <div style={{ background:'#fce4ec',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',padding:14 }}>
+                    <span style={{ position:'absolute',top:10,right:16,fontFamily:'Inter,sans-serif',fontSize:11,fontWeight:300,color:'#919191',letterSpacing:'-0.01em' }}>Quadrant IV</span>
+                    <div style={{ border:'1px solid rgba(0,0,0,0.1)',borderRadius:10,padding:'14px 16px',display:'flex',alignItems:'center',gap:14,maxWidth:380 }}>
+                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:600,color:'rgba(0,0,0,0.5)',margin:0,width:110,textAlign:'center',lineHeight:1.2,flexShrink:0 }}>Hidden Gems</p>
+                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:10,fontWeight:300,color:'#000',margin:0,lineHeight:1.5 }}>This quadrant will consist of <strong style={{ fontWeight:700 }}>purely visual discovery</strong>, highlighting <strong style={{ fontWeight:700 }}>unexpected</strong> and striking artworks</p>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Right: Sensory */}
+                <div style={{ flexShrink:0,width:108,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:10 }}>
+                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:14,fontWeight:500,color:'#000',margin:0,writingMode:'vertical-rl',letterSpacing:'0.01em' }}>Sensory</p>
+                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:12,fontWeight:300,color:'#777',textAlign:'center',margin:0,lineHeight:1.3 }}>visual experience, color, mood</p>
+                </div>
+
+              </div>
+
+              {/* Novel bottom labels */}
+              <div style={{ flexShrink:0,textAlign:'center',marginTop:5 }}>
+                <p style={{ fontFamily:'Inter,sans-serif',fontSize:15,fontWeight:500,color:'#000',margin:'0 0 2px',lineHeight:1.1 }}>Novel</p>
+                <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:300,color:'#777',margin:0,lineHeight:1.1 }}>undiscovered, obscure, niche</p>
+              </div>
+
+            </div>
+
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -1650,7 +1535,7 @@ function App() {
   const [temperature,setTemp]= useState(0.05);
   const handleFind=(q,t)=>{ setQuery(q); setTemp(t); setScreen('canvas'); };
   return (
-    <div style={{ width:'100%',height:'100%',overflow:'hidden',background:'#111' }}>
+    <div style={{ width:'100vw',height:'100vh',overflow:'hidden',background:'#111' }}>
       {screen==='landing' && <LandingScreen initQuery={query} initTemperature={temperature} onQueryChange={setQuery} onTempChange={setTemp} onFind={handleFind} />}
       {screen==='canvas'  && <ExploratoryCanvas initialQuery={query} initialTemperature={Math.max(temperature,0.05)} onBack={()=>setScreen('landing')} />}
     </div>
@@ -1658,13 +1543,6 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.getRegistrations?.().then(registrations => {
-    registrations.forEach(r => r.unregister());
-  }).catch(() => {});
-}
 </script>
 </body>
 </html>
