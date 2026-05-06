@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>NGA — Artwork Explorer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -11,7 +11,8 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'Inter',sans-serif; background:#111; overflow:hidden; -webkit-font-smoothing:antialiased; }
+    html, body { overscroll-behavior:none; }
+    body { font-family:'Inter',sans-serif; background:#111; overflow:hidden; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 
     @keyframes blob1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(60px,-40px) scale(1.12)} 66%{transform:translate(-30px,50px) scale(0.92)} }
     @keyframes blob2 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(-70px,30px) scale(0.9)} 66%{transform:translate(40px,-60px) scale(1.08)} }
@@ -166,10 +167,69 @@
     .similar-card-artist { font-size:6px; color:#9ca3af; padding:0 8px 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
     @media (max-width:600px) {
-      .find-btn { font-size:16px; padding:12px 22px; }
-      .search-input { width:calc(100vw - 140px); font-size:13px; }
-      .detail-panel { flex-direction:column; width:96vw; height:90vh; border-radius:16px; }
-      .detail-img-col { width:100%; height:200px; border-right:none; border-bottom:1px solid #e5e7eb; }
+      body { background:#050505; }
+      .landing-screen { justify-content:flex-start; padding:calc(env(safe-area-inset-top) + 116px) 22px calc(env(safe-area-inset-bottom) + 32px); }
+      .landing-content { width:100%; min-height:calc(100svh - 168px); justify-content:center; }
+      .landing-eyebrow { font-size:13px; margin-bottom:12px; color:rgba(255,255,255,0.52); }
+      .show-me-row { width:100%; max-width:none; display:flex; flex-wrap:wrap; justify-content:center; gap:6px 8px; font-size:28px; line-height:1.12; text-align:center; letter-spacing:-0.035em; }
+      .show-me-typed, .show-me-placeholder { white-space:normal; overflow-wrap:anywhere; }
+      .tick-slider-wrap { width:100%; margin-top:72px; }
+      .tick-track { height:36px; }
+      .tick-thumb { width:28px; height:28px; }
+      .tick-labels { font-size:11px; padding:0 2px; }
+      .tick-bubble { top:-34px; }
+      .find-btn { margin-top:30px; width:min(240px,80vw); height:54px; justify-content:center; font-size:17px; padding:0 24px; touch-action:manipulation; }
+
+      .screen-enter { min-height:100svh; }
+      .screen-enter > header { height:calc(116px + env(safe-area-inset-top)) !important; padding:calc(env(safe-area-inset-top) + 14px) 14px 12px !important; align-items:flex-end !important; justify-content:center !important; gap:10px !important; }
+      .screen-enter > header > button:first-child { left:14px !important; top:calc(env(safe-area-inset-top) + 14px) !important; width:42px !important; height:42px !important; padding:0 !important; border-radius:999px !important; transform:none !important; font-size:0 !important; justify-content:center !important; background:#fff !important; }
+      .screen-enter > header > button:first-child svg { width:18px; height:18px; }
+      .screen-enter > header > div { width:100% !important; max-width:none !important; align-self:flex-end !important; }
+      .screen-enter > header > button:last-child { right:14px !important; top:calc(env(safe-area-inset-top) + 14px) !important; width:42px !important; height:42px !important; padding:0 !important; border-radius:999px !important; transform:none !important; font-size:0 !important; justify-content:center !important; }
+      .screen-enter > header > button:last-child svg { width:18px; height:18px; }
+      .search-input { width:100% !important; height:48px; padding:12px 14px 12px 44px; font-size:14px; border-radius:999px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
+      .search-input::placeholder { color:rgba(10,10,10,0.42); }
+
+      .canvas-root { touch-action:none; cursor:grab; }
+      .axis-label { font-size:11px; line-height:16px; padding:5px 9px; border-radius:999px; background:rgba(255,255,255,0.5); }
+      .quad-label { font-size:7px; letter-spacing:0.1em; color:rgba(0,0,0,0.12); }
+      .artwork-node { border-radius:8px; }
+      .artwork-node img { border-radius:8px; }
+      .tooltip { display:none; }
+
+      .canvas-root > div[style*="top:24"], .canvas-root > div[style*="top: 24"] { top:auto !important; right:12px !important; bottom:16px !important; flex-direction:row !important; background:rgba(255,255,255,0.76) !important; border:1px solid rgba(209,213,220,0.9) !important; border-radius:999px !important; padding:6px !important; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); box-shadow:0 14px 34px rgba(0,0,0,0.16); }
+      .canvas-root > div[style*="top:24"] > div, .canvas-root > div[style*="top: 24"] > div { display:none !important; }
+      .btn { width:44px; height:44px; border-radius:999px; box-shadow:none; }
+
+      .screen-enter > footer { height:calc(112px + env(safe-area-inset-bottom)) !important; padding:18px 20px calc(env(safe-area-inset-bottom) + 34px) !important; justify-content:center !important; }
+      .screen-enter > footer .tick-slider-wrap { width:100% !important; margin:0 !important; }
+      .screen-enter > footer .tick-track { height:30px; }
+      .screen-enter > footer .tick-thumb { width:24px; height:24px; }
+
+      .detail-overlay { background:rgba(17,24,39,0.26); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+      .detail-panel { flex-direction:column; left:0; right:0; top:auto; bottom:0; width:100vw; height:min(86svh,760px); border-radius:22px 22px 0 0; border-left:0; border-right:0; border-bottom:0; transform:none; animation:mobileSheetIn 0.28s cubic-bezier(0.22,1,0.36,1) both; }
+      .detail-panel::before { content:""; position:absolute; top:8px; left:50%; width:42px; height:4px; border-radius:999px; background:#d1d5dc; transform:translateX(-50%); z-index:3; }
+      .detail-img-col { width:100%; height:34%; min-height:190px; border-right:none; border-bottom:1px solid #e5e7eb; padding:14px 14px 10px; }
+      .detail-img-col img { border-radius:14px; }
+      .detail-info-header { padding:16px 16px 12px; gap:10px; }
+      .detail-title { font-size:16px; line-height:1.25; }
+      .detail-artist { font-size:12px; }
+      .detail-meta-line { font-size:10px; flex-wrap:wrap; row-gap:3px; }
+      .detail-close { width:38px; height:38px; padding:0; justify-content:center; font-size:0; }
+      .detail-close svg { width:13px; height:13px; }
+      .detail-body { padding:14px 16px calc(env(safe-area-inset-bottom) + 20px); }
+      .detail-desc { font-size:13px; line-height:1.62; }
+      .why-text { font-size:12px; line-height:1.6; }
+      .detail-cta { min-height:44px; border-radius:999px; }
+      .similar-card { width:148px; border-radius:10px; }
+      .similar-card img { width:148px; height:88px; }
+
+      div[style*="z-index: 401"], div[style*="zIndex:401"] { width:100vw !important; height:100svh !important; border-radius:0 !important; }
+    }
+
+    @keyframes mobileSheetIn {
+      from { opacity:0; transform:translateY(100%); }
+      to   { opacity:1; transform:translateY(0); }
     }
   </style>
 </head>
@@ -280,10 +340,9 @@ function LandingScreen({ onFind, initQuery, initTemperature, onQueryChange, onTe
       <div className="landing-content">
         <div className="landing-eyebrow">Search by word, feeling, or idea</div>
         <div className="show-me-row" onClick={()=>inputRef.current?.focus()}>
-          <span className="show-me-static">Show me&nbsp;</span>
-          <span className="show-me-typed">{query}</span>
+          <span className="show-me-static">Show me</span>
           {query
-            ? <span className={`show-me-cursor${focused?' visible':''}`} />
+            ? <><span className="show-me-typed">{query}</span><span className={`show-me-cursor${focused?' visible':''}`} /></>
             : <><span className="show-me-placeholder">{PLACEHOLDERS[phIndex]}</span><span className={`show-me-cursor${focused?' visible':''}`} /></>
           }
           <input ref={inputRef} type="text" value={query} onChange={e=>handleQuery(e.target.value)} onKeyDown={onKey} onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)} autoComplete="off" spellCheck={false} style={{ position:'absolute',opacity:0,width:'1px',height:'1px',pointerEvents:'none' }} />
@@ -1212,6 +1271,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
 
   const pickerBtnRef = useRef(null);
   const dragStart    = useRef(null);
+  const touchStart   = useRef(null);
   const canvasRef    = useRef(null);
   const zoomRef      = useRef(1);
 
@@ -1231,6 +1291,11 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
   const handleMouseDown = e=>{ if(e.target.closest('.artwork-node')||e.target.closest('.btn'))return; setIsDragging(true); dragStart.current={x:e.clientX-pan.x,y:e.clientY-pan.y}; e.preventDefault(); };
   const handleMouseMove = useCallback(e=>{ if(!isDragging||!dragStart.current)return; setPan({x:e.clientX-dragStart.current.x,y:e.clientY-dragStart.current.y}); },[isDragging]);
   const handleMouseUp   = ()=>{ setIsDragging(false); dragStart.current=null; };
+
+  const touchDistance = touches => { const [a,b]=touches; return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY); };
+  const handleTouchStart = e=>{ if(e.target.closest('.artwork-node')||e.target.closest('.btn'))return; if(e.touches.length===1){const t=e.touches[0];touchStart.current={mode:'pan',x:t.clientX-pan.x,y:t.clientY-pan.y};setIsDragging(true);}if(e.touches.length===2){touchStart.current={mode:'pinch',distance:touchDistance(e.touches),zoom};setIsDragging(true);} };
+  const handleTouchMove  = e=>{ if(!touchStart.current)return; e.preventDefault(); if(touchStart.current.mode==='pan'&&e.touches.length===1){const t=e.touches[0];setPan({x:t.clientX-touchStart.current.x,y:t.clientY-touchStart.current.y});}if(touchStart.current.mode==='pinch'&&e.touches.length===2){setZoom(clamp(touchStart.current.zoom*(touchDistance(e.touches)/touchStart.current.distance),0.4,3));} };
+  const handleTouchEnd   = ()=>{ if(!touchStart.current)return; touchStart.current=null; setIsDragging(false); };
 
   const addCustomTag    = (id,tag) => setCustomTagsMap(p=>({...p,[id]:[...(p[id]||[]),tag]}));
   const removeCustomTag = (id,tag) => setCustomTagsMap(p=>({...p,[id]:(p[id]||[]).filter(t=>t!==tag)}));
@@ -1316,7 +1381,8 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
 
       {/* Canvas */}
       <div ref={canvasRef} className="canvas-root" style={{ flex:1,cursor:isDragging?'grabbing':'grab',userSelect:'none' }}
-        onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+        onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd}>
 
         {/* ── Viewport-fixed quadrant labels ── */}
         <span className="quad-label" style={{ top:18,left:18 }}>Education</span>
