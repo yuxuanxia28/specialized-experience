@@ -50,7 +50,7 @@
     .quad-label  { position:absolute; font-family:'Inter',sans-serif; font-weight:500; font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(0,0,0,0.09); pointer-events:none; user-select:none; z-index:4; }
 
     .artwork-node { position:absolute; transform:translate(-50%,-50%); border-radius:6px; overflow:hidden; cursor:pointer; will-change:transform,left,top,opacity,width,height; }
-    .artwork-node img { display:block; width:100%; height:100%; object-fit:cover; border-radius:6px; pointer-events:none; }
+    .artwork-node img { display:block; width:100%; height:100%; object-fit:cover; border-radius:6px; pointer-events:none; background:#f3f4f6; }
 
     .tooltip { position:fixed; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:12px 14px; width:220px; pointer-events:none; z-index:9999; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.06); animation:tooltipFadeIn 0.18s cubic-bezier(0.16,1,0.3,1) both; }
     .tooltip-img    { width:100%; height:120px; object-fit:cover; border-radius:6px; margin-bottom:10px; display:block; }
@@ -93,7 +93,7 @@
     .detail-overlay { position:fixed; inset:0; z-index:200; background:transparent; }
     .detail-panel   { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); width:min(960px,94vw); height:min(540px,88vh); display:flex; flex-direction:row; z-index:201; border-radius:20px; border:1.5px solid #d1d5dc; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.18),0 10px 20px -5px rgba(0,0,0,0.06); animation:cardPopIn 0.26s cubic-bezier(0.22,1,0.36,1) both; }
     .detail-img-col { width:50%; flex-shrink:0; background:#fff; border-right:1px solid #e5e7eb; display:flex; align-items:center; justify-content:center; padding:18px; overflow:hidden; }
-    .detail-img-col img { width:100%; height:100%; object-fit:cover; border-radius:12px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -4px rgba(0,0,0,0.1); }
+    .detail-img-col img { width:100%; height:100%; object-fit:contain; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -4px rgba(0,0,0,0.1); }
     .detail-img-year    { display:none; }
     .detail-img-overlay { display:none; }
     .detail-info-col { flex:1; background:#fff; display:flex; flex-direction:column; overflow:hidden; min-width:0; min-height:0; }
@@ -210,7 +210,7 @@
       .detail-panel { flex-direction:column; left:0; right:0; top:auto; bottom:0; width:100vw; height:min(86svh,760px); border-radius:22px 22px 0 0; border-left:0; border-right:0; border-bottom:0; transform:none; animation:mobileSheetIn 0.28s cubic-bezier(0.22,1,0.36,1) both; }
       .detail-panel::before { content:""; position:absolute; top:8px; left:50%; width:42px; height:4px; border-radius:999px; background:#d1d5dc; transform:translateX(-50%); z-index:3; }
       .detail-img-col { width:100%; height:34%; min-height:190px; border-right:none; border-bottom:1px solid #e5e7eb; padding:14px 14px 10px; }
-      .detail-img-col img { border-radius:14px; }
+      .detail-img-col img { border-radius:0; }
       .detail-info-header { padding:16px 16px 12px; gap:10px; }
       .detail-title { font-size:16px; line-height:1.25; }
       .detail-artist { font-size:12px; }
@@ -1266,6 +1266,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
   const [colorFilter,setColorFilter] = useState(null);
   const [showPicker,setShowPicker]   = useState(false);
   const [showInfo,setShowInfo]       = useState(false);
+  const [imageSizes,setImageSizes]   = useState({});
   // custom tags: { [artworkId]: string[] }
   const [customTagsMap,setCustomTagsMap] = useState({});
 
@@ -1410,12 +1411,15 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
             const x = preset ? preset.x : artwork.spreadX;
             const y = preset ? preset.y : artwork.spreadY;
             const size=artwork.baseSize;
+            const imgInfo=imageSizes[artwork.id];
+            let nodeW=size,nodeH=size;
+            if(imgInfo){ const r=imgInfo.w/imgInfo.h; if(r>1) nodeH=Math.round(size/r); else nodeW=Math.round(size*r); }
             const isVisible=visibleSet.has(artwork.id)&&!failedIds.has(artwork.id), isHovered=artwork.id===hoveredId, isSelected=artwork.id===selectedId;
             const rank=rankById[artwork.id]??i;
             const finalOp=loaded&&isVisible?1:0;
             return (
               <div key={artwork.id} className="artwork-node" style={{
-                left:`${x}%`,top:`${y}%`,width:size,height:size,
+                left:`${x}%`,top:`${y}%`,width:nodeW,height:nodeH,
                 opacity:finalOp,
                 transform:`translate(-50%,-50%) scale(${isHovered||isSelected?1.18:1})`,
                 boxShadow:isSelected?'0 20px 30px -6px rgba(0,0,0,0.22),0 0 0 2.5px rgba(201,169,110,0.8)':isHovered?'0 20px 30px -6px rgba(0,0,0,0.22),0 8px 12px -4px rgba(0,0,0,0.14)':'0 10px 15px -3px rgba(0,0,0,0.10)',
@@ -1437,6 +1441,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
                 onClick={()=>{ if(!isDragging) setSelectedId(s=>s===artwork.id?null:artwork.id); }}
               >
                 <img src={artwork.img} alt={artwork.title}
+                  onLoad={e=>{ const {naturalWidth:w,naturalHeight:h}=e.target; setImageSizes(p=>({...p,[artwork.id]:{w,h}})); }}
                   onError={()=>{ setFailedIds(s=>{ const n=new Set(s); n.add(artwork.id); return n; }); }} />
               </div>
             );
