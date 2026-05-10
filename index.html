@@ -6,6 +6,7 @@
   <title>NGA — Artwork Explorer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script>if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));}</script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -46,7 +47,7 @@
 
     .canvas-inner { position:absolute; inset:0; will-change:transform; }
 
-    .axis-label { position:absolute; font-family:'Inter',sans-serif; font-weight:300; font-size:18px; line-height:24px; letter-spacing:0.4554px; color:#000; pointer-events:none; user-select:none; z-index:5; background:rgba(255,255,255,0.32); backdrop-filter:blur(100px); -webkit-backdrop-filter:blur(100px); filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.10)); border-radius:12px; padding:8px 16px; white-space:nowrap; }
+    .axis-label { position:absolute; font-family:'Inter',sans-serif; font-weight:300; font-size:13px; line-height:18px; letter-spacing:0.3px; color:#000; pointer-events:none; user-select:none; z-index:5; background:rgba(255,255,255,0.32); backdrop-filter:blur(100px); -webkit-backdrop-filter:blur(100px); filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.10)); border-radius:12px; padding:8px 16px; white-space:nowrap; }
     .quad-label  { position:absolute; font-family:'Inter',sans-serif; font-weight:500; font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(0,0,0,0.09); pointer-events:none; user-select:none; z-index:4; }
 
     .artwork-node { position:absolute; transform:translate(-50%,-50%); border-radius:6px; overflow:hidden; cursor:pointer; will-change:transform,left,top,opacity,width,height; }
@@ -1000,6 +1001,61 @@ const ARTWORKS = [
     tags:["portrait", "post-impressionist", "indoor", "pattern", "floral print", "intimate", "decorative"],
     spreadX:94, spreadY:66, focusedX:50, focusedY:50, baseSize:54, relevance:0.55, quadX:94, quadY:66,
   },
+  {
+    id:59, img:'https://api.nga.gov/iiif/0ffc60ae-9f60-4511-85a2-8dac7c7546c8/full/!400,400/0/default.jpg',
+    title:'The Large Cat', artist:'Cornelis Visscher', year:'c. 1657',
+    medium:'engraving', dims:'overall: 24.5 x 19.8 cm (9 5/8 x 7 13/16 in.)',
+    collection:'National Gallery of Art, Washington D.C.',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.4895.html',
+    description:'Visscher\'s engraving of a cat is among the most celebrated animal prints of the Dutch Golden Age. The animal is shown in a state of alert repose — ears forward, eyes half-closed, fur rendered tick by tick with extraordinary precision. It is a portrait in the fullest sense, the cat granted the same psychological weight as a human sitter.',
+    analysis:'A direct title match: "cat" is the only subject and the only keyword. Visscher is a printmaking specialist known to graphic arts scholars — moderate familiarity within the expert tier, low general visibility.',
+    tags:["cat", "feline", "animal", "pet", "dutch golden age", "intimate", "quiet", "realist", "portrait"],
+    spreadX:14, spreadY:24, focusedX:50, focusedY:48, baseSize:64, relevance:0.84, quadX:14, quadY:24,
+  },
+  {
+    id:60, img:'https://api.nga.gov/iiif/67e0fd82-fc9e-4118-bc9d-8b9ce7aabb1c/full/!400,400/0/default.jpg',
+    title:'Woman with a Cat', artist:'Pierre-Auguste Renoir', year:'1875',
+    medium:'oil on canvas', dims:'overall: 56 x 46.4 cm (22 1/16 x 18 1/4 in.)',
+    collection:'National Gallery of Art, Washington D.C.',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.1157.html',
+    description:'A young woman cradles a grey cat against her shoulder. Renoir paints both with the same broken brushwork — fur and skin dissolved into the same warm light. The cat occupies the compositional centre, treated with an affection Renoir reserved for subjects he found genuinely beautiful. The animal is complicit, entirely at ease.',
+    analysis:'A direct title match — "cat" in the title. Renoir\'s global recognition places this in the upper-familiar zone. The sensory surface — warm light, soft texture — makes it accessible both semantically and visually.',
+    tags:["cat", "feline", "animal", "pet", "portrait", "impressionist", "intimate", "luminous", "indoor"],
+    spreadX:18, spreadY:12, focusedX:51, focusedY:47, baseSize:72, relevance:0.88, quadX:18, quadY:12,
+  },
+  {
+    id:61, img:'https://api.nga.gov/iiif/9ce72d30-67cd-4e45-90a4-4bdb24e7198f/full/!400,400/0/default.jpg',
+    title:"The Cat's Concert", artist:'Coryn Boel after David Teniers the Younger', year:'c. 1660',
+    medium:'etching', dims:'overall: 23.4 x 30.8 cm (9 3/16 x 12 1/8 in.)',
+    collection:'National Gallery of Art, Washington D.C.',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.62352.html',
+    description:"Cats assembled at a music stand, performing a concert in solemn parody of human music-making. Teniers painted several versions of this absurdist scene; Boel's etching spreads it as a popular print across Northern Europe. Each cat has a distinct personality — the conductor grave, the singer straining, the instrumentalists absorbed. The humor is affectionate rather than dismissive.",
+    analysis:'"Cat" is the primary title keyword — an unambiguous semantic match. Teniers is familiar to Flemish-art specialists; the animal-as-human genre gives this moderate general recognition. Sits at the Semantic-Familiar boundary.',
+    tags:["cat", "feline", "animal", "pet", "indoor", "dutch golden age", "domestic", "quiet", "realist", "still life"],
+    spreadX:22, spreadY:32, focusedX:50, focusedY:49, baseSize:68, relevance:0.80, quadX:22, quadY:32,
+  },
+  {
+    id:62, img:'https://api.nga.gov/iiif/e3e8f069-fb0a-48b4-8d05-a2321fcc0b6f/full/!400,400/0/default.jpg',
+    title:'Lion', artist:'Peter Paul Rubens', year:'c. 1612/1615',
+    medium:'black chalk on paper', dims:'overall: 25.1 x 26.7 cm (9 7/8 x 10 1/2 in.)',
+    collection:'National Gallery of Art, Washington D.C.',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.52288.html',
+    description:'A study of a lion\'s head, drawn from life at a private menagerie. Rubens approaches the animal with the same analytical intensity he brought to human anatomy — every ridge of muscle, every coil of mane recorded in rapid chalk. The lion looks directly at the viewer, and there is no doubt about the terms of the encounter.',
+    analysis:'Retrieved at high temperature when the system expands from domestic cats to the full feline family — lion as the apex cat, sharing the predatory stillness and intense forward gaze of the domestic animal. Rubens\'s fame places this in familiar territory.',
+    tags:["cat", "feline", "animal", "lion", "dramatic", "realist", "baroque", "portrait", "bold"],
+    spreadX:76, spreadY:14, focusedX:53, focusedY:46, baseSize:70, relevance:0.86, quadX:76, quadY:14,
+  },
+  {
+    id:63, img:'https://api.nga.gov/iiif/aa3e5e14-5e8b-42e7-b6a6-52456c742b1c/full/!400,400/0/default.jpg',
+    title:'Young Tiger Playing with its Mother', artist:'Eugène Delacroix', year:'c. 1830',
+    medium:'oil on canvas', dims:'overall: 130.2 x 194.9 cm (51 1/4 x 76 3/4 in.)',
+    collection:'National Gallery of Art, Washington D.C.',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.46490.html',
+    description:'Delacroix was obsessed with the big cats he drew from life at the Paris zoo and in the private menageries of collectors. Here a young tiger bats playfully at its recumbent mother — the scene is one of the most domestic moments he ever painted, the predator temporarily a kitten. The dappled light, loose posture, and physical contact carry an intimacy that the subject does not usually permit.',
+    analysis:'Retrieved at high temperature when the search expands from domestic cats to the broader feline genus. The young tiger\'s playful posture — rolling, batting, relaxed — is the precise motion a cat owner recognises from their own floor. Delacroix\'s Romantic fame places this high on the familiar axis.',
+    tags:["cat", "feline", "animal", "jaguar", "dramatic", "romantic", "bold", "energetic", "outdoor", "wild"],
+    spreadX:84, spreadY:36, focusedX:54, focusedY:50, baseSize:66, relevance:0.78, quadX:84, quadY:36,
+  },
 ];
 
 function lerp(a,b,t)    { return a+(b-a)*t; }
@@ -1072,6 +1128,22 @@ const QUERY_PRESETS = {
     { id:47, x:76, y:72, reason:'A time-of-day title with no emotional keyword. This appears because the solitary figure, the fading light, and the muted palette create a visual atmosphere of loneliness and quiet grief — tone as meaning, invisible to a metadata query.' },
     { id:22, x:70, y:64, reason:'A descriptive genre title. This appears because the depicted scene — a rough cottage, humble figures in worn clothing — carries visual markers of hardship and quiet resignation that a mood-based embedding scores as low-valence emotional content.' },
   ],
+  cats: [
+    // Semantic — "cat" is in the title (left side, x < 50)
+    { id:60, x:28, y:12, reason:'"Cat" appears in the title — a direct keyword match. Renoir\'s global recognition places this in the upper-Familiar tier. The work is semantically unambiguous: the cat is a named subject.' },
+    { id:61, x:38, y:44, reason:'"Cat" is the primary title keyword — an unambiguous semantic match. Teniers is familiar to Flemish-art specialists; the animal-as-human genre gives this moderate general recognition, placing the work at the Semantic-Familiar boundary.' },
+    { id:59, x:22, y:74, reason:'"Cat" is the entire title — maximum semantic confidence. Visscher is a printmaking specialist known to graphic-arts scholars but not to general audiences, placing this in the Semantic-Novel zone despite the directness of the match.' },
+    // Sensory — feline is visually present; title names something else (right side, x > 50)
+    { id:62, x:60, y:10, reason:'The title says "Lion" — but the lion is the apex member of the feline family, sharing the same forward gaze, coiled posture, and predatory stillness as the domestic cat. A visual embedding on feline anatomy scores this at the top of the sensory axis. Rubens places it in the Familiar zone.' },
+    { id:63, x:64, y:28, reason:'The title names a tiger — the largest member of the feline family, sharing the same anatomy, motion, and hunting instinct as the domestic cat. The young tiger\'s playful posture in this painting is indistinguishable from a kitten at play. Delacroix\'s Romantic fame places this high on the familiar axis.' },
+    { id:9,  x:70, y:44, reason:'The title names a location, not an animal. This appears because Dutch courtyard scenes of this period frequently include cats as incidental figures in the domestic space. The quiet, observant atmosphere — sunlit, unhurried — registers in the same embedding space as feline domestic presence.' },
+    { id:2,  x:74, y:12, reason:'The title is a portrait description with no animal keyword. This appears because the sitter\'s expression — alert, composed, watching — carries the same quality of contained attention that a visual embedding on feline subjects scores as a cat-like affect. Vermeer places it at the top of the familiarity axis.' },
+    { id:15, x:78, y:66, reason:'The title names a domestic interior. This appears because cats were a standard feature of Dutch household scenes — a vector search on domestic feline presence in paintings of this type returns this class of work at moderate confidence.' },
+    { id:42, x:84, y:46, reason:'Bosch\'s moralising allegory with no feline keyword. Surfaces at high temperature because the depicted scene includes small creatures lurking in shadow — the margin-dwelling, nocturnal presence of small animals that share ecological and perceptual space with cats in domestic and symbolic contexts.' },
+    { id:3,  x:86, y:20, reason:'A self-portrait with no animal keyword. Surfaces at the highest exploratory tier because the unwavering gaze — direct, still, giving nothing away — is the quality a multimodal embedding trained on feline subjects scores as cat-like affect in human portraiture. Rembrandt\'s fame anchors it to the top of the familiar axis.' },
+    { id:14, x:66, y:58, reason:'A Baroque portrait with no animal in the title. Surfaces at high temperature when the system expands from cats-as-subjects to the quality of feline watchfulness — the sitter\'s absorbed, inward attention carries the same stillness as a cat at rest, scored as feline affect by the multimodal embedding.' },
+    { id:22, x:68, y:76, reason:'A Dutch cottage interior with no feline keyword. Surfaces at high temperature because the depicted domestic environment — simple cottage, humble objects, quiet figures — is the precise habitat of working cats in 17th-century Northern Europe. A context search, not a content search.' },
+  ],
 };
 
 // ─── Color utilities ──────────────────────────────────────────────────────────
@@ -1131,7 +1203,7 @@ function QuadrantMap({ quadX, quadY }) {
         <div className="qmap-ax qmap-ax-y" />
         <div className="qmap-dot" style={{ left:`${quadX}%`, top:`${100-quadY}%` }} />
       </div>
-      <div className="qmap-lbl"><span>Semantic</span><span>Sensory</span></div>
+      <div className="qmap-lbl"><span>By Name</span><span>Sensory</span></div>
     </div>
   );
 }
@@ -1152,7 +1224,7 @@ function PositionMap({ posX, posY }) {
       </div>
       <div style={{ textAlign:'center', fontSize:8, color:'#d1d5dc', marginTop:3, marginBottom:2, letterSpacing:'0.05em', textTransform:'uppercase' }}>Novel</div>
       <div className="qmap-lbl">
-        <span>Semantic</span>
+        <span>By Name</span>
         <span>Sensory</span>
       </div>
     </div>
@@ -1215,7 +1287,7 @@ function DetailPanel({ artwork, allArtworks, presetItem, onClose }) {
                 <div className="detail-rule" />
                 <div className="detail-section-head">Why you're seeing this</div>
                 <span className={`why-tag ${presetItem.x < 50 ? 'why-tag--semantic' : 'why-tag--sensory'}`} style={{ marginBottom:8, display:'inline-flex' }}>
-                  {presetItem.x < 50 ? 'Semantic match' : 'Sensory match'}
+                  {presetItem.x < 50 ? 'By Name' : 'Sensory match'}
                 </span>
                 <p className="why-text" style={{ marginTop:8 }}>{presetItem.reason}</p>
               </>
@@ -1340,6 +1412,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
     return new Set(scoredArtworks.slice(0, vc).map(a => a.id));
   }, [activePreset, temperature, scoredArtworks]);
 
+
   // Pan to centroid of visible items so they're always in view
   useEffect(()=>{
     const items = ARTWORKS.filter(a => visibleSet.has(a.id));
@@ -1395,8 +1468,8 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
         {/* ── Static axis end labels ── */}
         <span className="axis-label" style={{ top:22,left:'50%',transform:'translateX(-50%)' }}>Familiar</span>
         <span className="axis-label" style={{ bottom:22,left:'50%',transform:'translateX(-50%)' }}>Novel</span>
-        <span className="axis-label" style={{ left:22,top:'50%',transform:'translateY(-50%) rotate(-90deg)' }}>Semantic</span>
-        <span className="axis-label" style={{ right:22,top:'50%',transform:'translateY(-50%) rotate(90deg)' }}>Sensory</span>
+        <span className="axis-label" style={{ left:22,top:'50%',transform:'translateY(-50%)' }}>By Name</span>
+        <span className="axis-label" style={{ right:22,top:'50%',transform:'translateY(-50%)' }}>Sensory</span>
 
         {/* ── Subtle tint (static) ── */}
         <div style={{ position:'absolute',inset:0,pointerEvents:'none',zIndex:1,background:`radial-gradient(ellipse 40% 30% at 50% 0%,rgba(147,197,253,0.06) 0%,transparent 100%),radial-gradient(ellipse 40% 30% at 50% 100%,rgba(254,202,202,0.06) 0%,transparent 100%),radial-gradient(ellipse 20% 50% at 0% 50%,rgba(196,181,253,0.06) 0%,transparent 100%),radial-gradient(ellipse 20% 50% at 100% 50%,rgba(253,230,138,0.06) 0%,transparent 100%)` }} />
@@ -1410,7 +1483,11 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
             const preset=presetById?.[artwork.id];
             const x = preset ? preset.x : artwork.spreadX;
             const y = preset ? preset.y : artwork.spreadY;
-            const size=artwork.baseSize;
+            const SIZE_THRESH = 0.35;
+            const sizeMultiplier = temperature < SIZE_THRESH
+              ? 1.8 + (1 - temperature / SIZE_THRESH) * 1.0
+              : 1.8;
+            const size=artwork.baseSize * sizeMultiplier;
             const imgInfo=imageSizes[artwork.id];
             let nodeW=size,nodeH=size;
             if(imgInfo){ const r=imgInfo.w/imgInfo.h; if(r>1) nodeH=Math.round(size/r); else nodeW=Math.round(size*r); }
@@ -1502,96 +1579,14 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
       {/* Info modal */}
       {showInfo && (
         <>
-          <div style={{ position:'fixed',inset:0,zIndex:400,background:'rgba(0,0,0,0.5)' }} onClick={()=>setShowInfo(false)} />
-          <div style={{ position:'fixed',left:'50%',top:'50%',transform:'translate(-50%,-50%)',zIndex:401,width:'min(1060px,95vw)',height:'min(700px,90vh)',background:'#fff',borderRadius:20,border:'1.5px solid #d1d5dc',boxShadow:'0 25px 50px -12px rgba(0,0,0,0.22)',display:'flex',flexDirection:'column',overflow:'hidden' }}>
-
-            {/* Header: title + close */}
-            <div style={{ flexShrink:0,padding:'28px 32px 18px',display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:20 }}>
-              <p style={{ fontFamily:'Inter,sans-serif',fontSize:20,fontWeight:300,color:'#000',lineHeight:1.2,margin:0,maxWidth:380,letterSpacing:'-0.01em' }}>
-                Around the space, there are <strong style={{ fontWeight:700 }}>four</strong> directional relationship types.
-              </p>
-              <button onClick={()=>setShowInfo(false)} style={{ display:'inline-flex',alignItems:'center',gap:4,flexShrink:0,background:'#fff',border:'1.5px solid #d1d5dc',borderRadius:999,padding:'8px 16px 8px 12px',cursor:'pointer',fontFamily:'Inter,sans-serif',fontSize:14,color:'#858585',letterSpacing:'-0.01em',transition:'background 0.15s',whiteSpace:'nowrap' }}
-                onMouseEnter={e=>e.currentTarget.style.background='#f9fafb'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                Close
-              </button>
-            </div>
-
-            {/* Diagram area */}
-            <div style={{ flex:1,minHeight:0,padding:'0 24px 20px',display:'flex',flexDirection:'column' }}>
-
-              {/* Familiar top labels */}
-              <div style={{ flexShrink:0,textAlign:'center',marginBottom:5 }}>
-                <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:300,color:'#777',margin:'0 0 2px',lineHeight:1.1 }}>mainstream, iconic, personal history</p>
-                <p style={{ fontFamily:'Inter,sans-serif',fontSize:15,fontWeight:500,color:'#000',margin:0,lineHeight:1.1 }}>Familiar</p>
-              </div>
-
-              {/* Middle: Semantic | grid | Sensory */}
-              <div style={{ flex:1,minHeight:0,display:'flex',alignItems:'stretch',gap:10 }}>
-
-                {/* Left: Semantic */}
-                <div style={{ flexShrink:0,width:108,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:10 }}>
-                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:12,fontWeight:300,color:'#777',textAlign:'center',margin:0,lineHeight:1.3 }}>direct name match, surface level</p>
-                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:14,fontWeight:500,color:'#000',margin:0,writingMode:'vertical-rl',transform:'rotate(180deg)',letterSpacing:'0.01em' }}>Semantic</p>
-                </div>
-
-                {/* 2×2 colored grid */}
-                <div style={{ flex:1,display:'grid',gridTemplateColumns:'1fr 1fr',gridTemplateRows:'1fr 1fr',border:'1.5px solid #d1d5dc',borderRadius:20,overflow:'hidden' }}>
-
-                  {/* TL: Curated Canon — Familiar + Semantic — green */}
-                  <div style={{ background:'#e8f5e9',borderRight:'0.75px solid #d1d5dc',borderBottom:'0.75px solid #d1d5dc',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',padding:14 }}>
-                    <span style={{ position:'absolute',bottom:10,left:16,fontFamily:'Inter,sans-serif',fontSize:11,fontWeight:300,color:'#919191',letterSpacing:'-0.01em' }}>Quadrant II</span>
-                    <div style={{ border:'1px solid rgba(0,0,0,0.1)',borderRadius:10,padding:'14px 16px',display:'flex',alignItems:'center',gap:14,maxWidth:380 }}>
-                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:600,color:'rgba(0,0,0,0.5)',margin:0,width:110,textAlign:'center',lineHeight:1.2,flexShrink:0 }}>Curated Canon</p>
-                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:10,fontWeight:300,color:'#000',margin:0,lineHeight:1.5 }}>This quadrant will consist of <strong style={{ fontWeight:700 }}>iconic artworks</strong> and more <strong style={{ fontWeight:700 }}>traditionally matching artworks</strong> (direct matches)</p>
-                    </div>
-                  </div>
-
-                  {/* TR: Moodboard — Familiar + Sensory — blue */}
-                  <div style={{ background:'#e1f5fe',borderBottom:'0.75px solid #d1d5dc',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',padding:14 }}>
-                    <span style={{ position:'absolute',bottom:10,right:16,fontFamily:'Inter,sans-serif',fontSize:11,fontWeight:300,color:'#919191',letterSpacing:'-0.01em' }}>Quadrant I</span>
-                    <div style={{ border:'1px solid rgba(0,0,0,0.1)',borderRadius:10,padding:'14px 16px',display:'flex',alignItems:'center',gap:14,maxWidth:380 }}>
-                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:600,color:'rgba(0,0,0,0.5)',margin:0,width:110,textAlign:'center',lineHeight:1.2,flexShrink:0 }}>Moodboard</p>
-                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:10,fontWeight:300,color:'#000',margin:0,lineHeight:1.5 }}>This quadrant will consist of <strong style={{ fontWeight:700 }}>popular trends</strong> and <strong style={{ fontWeight:700 }}>visually or stylistically matching artworks</strong> (vibe-based matches)</p>
-                    </div>
-                  </div>
-
-                  {/* BL: Niche Deep-Dive — Novel + Semantic — orange */}
-                  <div style={{ background:'#fff3e0',borderRight:'0.75px solid #d1d5dc',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',padding:14 }}>
-                    <span style={{ position:'absolute',top:10,left:16,fontFamily:'Inter,sans-serif',fontSize:11,fontWeight:300,color:'#919191',letterSpacing:'-0.01em' }}>Quadrant III</span>
-                    <div style={{ border:'1px solid rgba(0,0,0,0.1)',borderRadius:10,padding:'14px 16px',display:'flex',alignItems:'center',gap:14,maxWidth:380 }}>
-                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:600,color:'rgba(0,0,0,0.5)',margin:0,width:110,textAlign:'center',lineHeight:1.2,flexShrink:0 }}>Niche Deep-Dive</p>
-                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:10,fontWeight:300,color:'#000',margin:0,lineHeight:1.5 }}>This quadrant will consist of <strong style={{ fontWeight:700 }}>rare archival works</strong> and is ideal for deeper, in-depth research</p>
-                    </div>
-                  </div>
-
-                  {/* BR: Hidden Gems — Novel + Sensory — pink */}
-                  <div style={{ background:'#fce4ec',position:'relative',display:'flex',alignItems:'center',justifyContent:'center',padding:14 }}>
-                    <span style={{ position:'absolute',top:10,right:16,fontFamily:'Inter,sans-serif',fontSize:11,fontWeight:300,color:'#919191',letterSpacing:'-0.01em' }}>Quadrant IV</span>
-                    <div style={{ border:'1px solid rgba(0,0,0,0.1)',borderRadius:10,padding:'14px 16px',display:'flex',alignItems:'center',gap:14,maxWidth:380 }}>
-                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:600,color:'rgba(0,0,0,0.5)',margin:0,width:110,textAlign:'center',lineHeight:1.2,flexShrink:0 }}>Hidden Gems</p>
-                      <p style={{ fontFamily:'Inter,sans-serif',fontSize:10,fontWeight:300,color:'#000',margin:0,lineHeight:1.5 }}>This quadrant will consist of <strong style={{ fontWeight:700 }}>purely visual discovery</strong>, highlighting <strong style={{ fontWeight:700 }}>unexpected</strong> and striking artworks</p>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Right: Sensory */}
-                <div style={{ flexShrink:0,width:108,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:10 }}>
-                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:14,fontWeight:500,color:'#000',margin:0,writingMode:'vertical-rl',letterSpacing:'0.01em' }}>Sensory</p>
-                  <p style={{ fontFamily:'Inter,sans-serif',fontSize:12,fontWeight:300,color:'#777',textAlign:'center',margin:0,lineHeight:1.3 }}>visual experience, color, mood</p>
-                </div>
-
-              </div>
-
-              {/* Novel bottom labels */}
-              <div style={{ flexShrink:0,textAlign:'center',marginTop:5 }}>
-                <p style={{ fontFamily:'Inter,sans-serif',fontSize:15,fontWeight:500,color:'#000',margin:'0 0 2px',lineHeight:1.1 }}>Novel</p>
-                <p style={{ fontFamily:'Inter,sans-serif',fontSize:13,fontWeight:300,color:'#777',margin:0,lineHeight:1.1 }}>undiscovered, obscure, niche</p>
-              </div>
-
-            </div>
-
+          <div style={{ position:'fixed',inset:0,zIndex:400,background:'rgba(0,0,0,0.45)' }} onClick={()=>setShowInfo(false)} />
+          <div style={{ position:'fixed',left:'50%',top:'50%',transform:'translate(-50%,-50%)',zIndex:401,width:'min(1100px,94vw)',background:'#fff',borderRadius:20,border:'1.5px solid #d1d5dc',boxShadow:'0 25px 50px -12px rgba(0,0,0,0.22)',overflow:'hidden' }}>
+            <button onClick={()=>setShowInfo(false)} style={{ position:'absolute',top:16,right:16,display:'inline-flex',alignItems:'center',gap:4,background:'#fff',border:'1.5px solid #d1d5dc',borderRadius:999,padding:'7px 14px 7px 11px',cursor:'pointer',fontFamily:'Inter,sans-serif',fontSize:13,color:'#858585',zIndex:2,transition:'background 0.15s' }}
+              onMouseEnter={e=>e.currentTarget.style.background='#f9fafb'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              Close
+            </button>
+            <img src="quadrant-diagram.png" alt="Quadrant diagram" style={{ display:'block',width:'100%',height:'auto',padding:'48px 0' }} />
           </div>
         </>
       )}
