@@ -1203,7 +1203,7 @@ function QuadrantMap({ quadX, quadY }) {
         <div className="qmap-ax qmap-ax-y" />
         <div className="qmap-dot" style={{ left:`${quadX}%`, top:`${100-quadY}%` }} />
       </div>
-      <div className="qmap-lbl"><span>By Name</span><span>Sensory</span></div>
+      <div className="qmap-lbl"><span>By Name</span><span>By Vibe</span></div>
     </div>
   );
 }
@@ -1225,7 +1225,7 @@ function PositionMap({ posX, posY }) {
       <div style={{ textAlign:'center', fontSize:8, color:'#d1d5dc', marginTop:3, marginBottom:2, letterSpacing:'0.05em', textTransform:'uppercase' }}>Novel</div>
       <div className="qmap-lbl">
         <span>By Name</span>
-        <span>Sensory</span>
+        <span>By Vibe</span>
       </div>
     </div>
   );
@@ -1287,7 +1287,7 @@ function DetailPanel({ artwork, allArtworks, presetItem, onClose }) {
                 <div className="detail-rule" />
                 <div className="detail-section-head">Why you're seeing this</div>
                 <span className={`why-tag ${presetItem.x < 50 ? 'why-tag--semantic' : 'why-tag--sensory'}`} style={{ marginBottom:8, display:'inline-flex' }}>
-                  {presetItem.x < 50 ? 'By Name' : 'Sensory match'}
+                  {presetItem.x < 50 ? 'By Name' : 'By Vibe match'}
                 </span>
                 <p className="why-text" style={{ marginTop:8 }}>{presetItem.reason}</p>
               </>
@@ -1469,7 +1469,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
         <span className="axis-label" style={{ top:22,left:'50%',transform:'translateX(-50%)' }}>Familiar</span>
         <span className="axis-label" style={{ bottom:22,left:'50%',transform:'translateX(-50%)' }}>Novel</span>
         <span className="axis-label" style={{ left:22,top:'50%',transform:'translateY(-50%)' }}>By Name</span>
-        <span className="axis-label" style={{ right:22,top:'50%',transform:'translateY(-50%)' }}>Sensory</span>
+        <span className="axis-label" style={{ right:22,top:'50%',transform:'translateY(-50%)' }}>By Vibe</span>
 
         {/* ── Subtle tint (static) ── */}
         <div style={{ position:'absolute',inset:0,pointerEvents:'none',zIndex:1,background:`radial-gradient(ellipse 40% 30% at 50% 0%,rgba(147,197,253,0.06) 0%,transparent 100%),radial-gradient(ellipse 40% 30% at 50% 100%,rgba(254,202,202,0.06) 0%,transparent 100%),radial-gradient(ellipse 20% 50% at 0% 50%,rgba(196,181,253,0.06) 0%,transparent 100%),radial-gradient(ellipse 20% 50% at 100% 50%,rgba(253,230,138,0.06) 0%,transparent 100%)` }} />
