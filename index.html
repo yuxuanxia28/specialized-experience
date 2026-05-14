@@ -13,6 +13,7 @@
   <style>
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     html, body { overscroll-behavior:none; }
+    .info-modal::-webkit-scrollbar { display:none; }
     body { font-family:'Inter',sans-serif; background:#111; overflow:hidden; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 
     @keyframes blob1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(60px,-40px) scale(1.12)} 66%{transform:translate(-30px,50px) scale(0.92)} }
@@ -48,7 +49,7 @@
     .canvas-inner { position:absolute; inset:0; will-change:transform; }
 
     .axis-label { position:absolute; font-family:'Inter',sans-serif; font-weight:300; font-size:13px; line-height:18px; letter-spacing:0.3px; color:#000; pointer-events:none; user-select:none; z-index:5; background:rgba(255,255,255,0.32); backdrop-filter:blur(100px); -webkit-backdrop-filter:blur(100px); filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.10)); border-radius:12px; padding:8px 16px; white-space:nowrap; }
-    .quad-label  { position:absolute; font-family:'Inter',sans-serif; font-weight:500; font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(0,0,0,0.09); pointer-events:none; user-select:none; z-index:4; }
+    .quad-label  { position:absolute; font-family:'Inter',sans-serif; font-weight:500; font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:#000000; pointer-events:none; user-select:none; z-index:4; }
 
     .artwork-node { position:absolute; transform:translate(-50%,-50%); border-radius:6px; overflow:hidden; cursor:pointer; will-change:transform,left,top,opacity,width,height; }
     .artwork-node img { display:block; width:100%; height:100%; object-fit:cover; border-radius:6px; pointer-events:none; background:#f3f4f6; }
@@ -193,7 +194,7 @@
 
       .canvas-root { touch-action:none; cursor:grab; }
       .axis-label { font-size:11px; line-height:16px; padding:5px 9px; border-radius:999px; background:rgba(255,255,255,0.5); }
-      .quad-label { font-size:7px; letter-spacing:0.1em; color:rgba(0,0,0,0.12); }
+      .quad-label { font-size:7px; letter-spacing:0.1em; color:#000000; }
       .artwork-node { border-radius:8px; }
       .artwork-node img { border-radius:8px; }
       .tooltip { display:none; }
@@ -357,7 +358,7 @@ function LandingScreen({ onFind, initQuery, initTemperature, onQueryChange, onTe
 
 // ─── Artwork data ─────────────────────────────────────────────────────────────
 // Axes: X = Semantic (left, 0) → Sensory (right, 100)
-//       Y = Familiar (top, low%) → Novel (bottom, high%)
+//       Y = Mainstream (top, low%) → Niche (bottom, high%)
 // spreadX/spreadY = analytically correct positions at temperature=1
 // focusedX/focusedY = cluster near centre at temperature=0
 const ARTWORKS = [
@@ -368,7 +369,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.26.html',
     description:'One of the most beloved works in the NGA collection, this tondo depicts the Virgin Mary in a Roman landscape with the Christ Child and young Saint John. The circular format gives the composition a sense of cosmic harmony. Raphael\'s mastery of sfumato and his ability to combine Florentine grace with Roman monumentality are fully on display.',
-    analysis:'Globally famous and universally taught — an anchor of the Familiar axis. Discovered through art-historical terminology: Madonna, Renaissance, Raphael.',
+    analysis:'Globally famous and universally taught — an anchor of the Mainstream axis. Discovered through art-historical terminology: Madonna, Renaissance, Raphael.',
     tags:["renaissance", "portrait", "landscape", "religious", "serene", "luminous", "classical"],
     spreadX:85, spreadY:14, focusedX:50, focusedY:48, baseSize:80, relevance:0.95, quadX:22, quadY:4,
   },
@@ -390,7 +391,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.79.html',
     description:'One of over 40 known self-portraits, this late work shows Rembrandt at 53, having recently survived bankruptcy. His gaze is unwavering — an artist who has lost everything except the power of honest observation. The warm amber light emerges from shadow in the manner he invented: chiaroscuro as psychological revelation.',
-    analysis:'Iconic and globally recognised — deep Familiar territory. Primarily a semantic match: self-portrait, Rembrandt, Dutch Golden Age.',
+    analysis:'Iconic and globally recognised — deep Mainstream territory. Primarily a semantic match: self-portrait, Rembrandt, Dutch Golden Age.',
     tags:["portrait", "dutch golden age", "dramatic", "intimate", "luminous", "baroque"],
     spreadX:82, spreadY:18, focusedX:48, focusedY:50, baseSize:76, relevance:0.9, quadX:18, quadY:8,
   },
@@ -401,7 +402,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.1158.html',
     description:'In the wings of the Paris Opera, dancers stretch and adjust costumes in the cramped backstage space. Degas attended hundreds of rehearsals, building encyclopedic knowledge of this world. His unusual downward angle collapses pictorial depth into a shimmering pattern of tulle and pink light.',
-    analysis:'Degas ballerinas are iconic — Familiar territory for anyone who knows Impressionism. The atmospheric quality and cropped composition add a strong sensory dimension.',
+    analysis:'Degas ballerinas are iconic — Mainstream territory for anyone who knows Impressionism. The atmospheric quality and cropped composition add a strong sensory dimension.',
     tags:["portrait", "impressionist", "indoor", "delicate", "intimate", "movement", "luminous"],
     spreadX:68, spreadY:16, focusedX:51, focusedY:49, baseSize:72, relevance:0.86, quadX:66, quadY:14,
   },
@@ -412,7 +413,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.117.html',
     description:'Turner dissolves Venice into a haze of golden light and shimmering water. The city\'s domes emerge from mist like a hallucination. By 1844 his canvases had become almost entirely atmospheric — pigment as pure sensation. Ruskin called him \'the painter of light\'; this work shows why.',
-    analysis:'Pure sensation and colour — firmly in the Sensory quadrant. Turner\'s fame puts it in Familiar territory, yet the abstract quality surprises viewers who expect conventional landscape.',
+    analysis:'Pure sensation and colour — firmly in the Sensory quadrant. Turner\'s fame puts it in Mainstream territory, yet the abstract quality surprises viewers who expect conventional landscape.',
     tags:["landscape", "seascape", "romantic", "luminous", "ethereal", "outdoor", "dreamlike", "golden", "water"],
     spreadX:90, spreadY:22, focusedX:54, focusedY:46, baseSize:78, relevance:0.85, quadX:88, quadY:22,
   },
@@ -478,7 +479,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.92.html',
     description:'The Marquesa stands in a silvery landscape, her powdered wig and grey silk dress marking her as a fashionable aristocrat. Yet Goya\'s penetrating eye finds something wistful beneath the costume. It is among his most charming pre-dark-period works, before the disillusionment of war transformed his art.',
-    analysis:'A historical portrait — primarily a semantic match for Goya, Spanish portraiture, 18th century. Familiar to Spanish art specialists but less iconic globally.',
+    analysis:'A historical portrait — primarily a semantic match for Goya, Spanish portraiture, 18th century. Mainstream to Spanish art specialists but less iconic globally.',
     tags:["portrait", "outdoor", "romantic", "delicate", "wistful", "luminous", "historical"],
     spreadX:40, spreadY:46, focusedX:49, focusedY:51, baseSize:62, relevance:0.72, quadX:30, quadY:44,
   },
@@ -544,7 +545,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.1149.html',
     description:'Corot worked in the Barbizon forests for decades, developing an approach that influenced the Impressionists. In his late style the trees dissolve into silver-grey veils, the light diffuse and dreamy. This quiet glade is almost entirely mood — a proto-Impressionist vision of nature as feeling.',
-    analysis:'A sensory discovery — atmospheric and painterly. Corot is known among art enthusiasts but less mainstream than the Impressionists, placing it in the Novel-leaning zone.',
+    analysis:'A sensory discovery — atmospheric and painterly. Corot is known among art enthusiasts but less mainstream than the Impressionists, placing it in the Niche-leaning zone.',
     tags:["landscape", "outdoor", "romantic", "serene", "quiet", "pastoral", "dreamlike"],
     spreadX:70, spreadY:60, focusedX:50, focusedY:53, baseSize:58, relevance:0.68, quadX:72, quadY:58,
   },
@@ -588,7 +589,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.1157.html',
     description:'Degas transforms the racecourse into a formal arrangement of planes and silhouettes. Jockeys and horses are caught in suspended animation — not a dramatic moment but a pause between action. The flattened perspective and cropped edges reflect his study of Japanese woodblock prints.',
-    analysis:'A sensory discovery: the composition\'s energy and colour before its subject matter. Degas is well known, placing this work in the Familiar half.',
+    analysis:'A sensory discovery: the composition\'s energy and colour before its subject matter. Degas is well known, placing this work in the Mainstream half.',
     tags:["landscape", "impressionist", "outdoor", "energetic", "movement", "bold"],
     spreadX:72, spreadY:20, focusedX:50, focusedY:48, baseSize:68, relevance:0.82, quadX:70, quadY:18,
   },
@@ -643,7 +644,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.1187.html',
     description:'A peasant family enjoys the mild air outside their thatched cottage doorway. Van Ostade was the master of Dutch low-life genre: coarse textures, dappled light, the smell of earth and straw somehow present in oil paint. The affection in the scene is unmistakable — humour without condescension.',
-    analysis:'A niche discovery for Dutch art specialists. Van Ostade is rarely the first name a visitor knows, placing this firmly in the Novel half. The textural detail rewards close observation.',
+    analysis:'A niche discovery for Dutch art specialists. Van Ostade is rarely the first name a visitor knows, placing this firmly in the Niche half. The textural detail rewards close observation.',
     tags:["landscape", "outdoor", "dutch golden age", "quiet", "pastoral", "intimate", "domestic"],
     spreadX:36, spreadY:70, focusedX:50, focusedY:54, baseSize:52, relevance:0.58, quadX:35, quadY:68,
   },
@@ -687,7 +688,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.46097.html',
     description:'De Heem assembled flowers from different seasons — an impossibility in nature — to create an idealised garden in paint. Insects and dewdrops demonstrate the illusionistic virtuosity prized by Dutch collectors. One of the supreme achievements of Baroque still life, catalogued under artist name, medium, and subject with complete precision.',
-    analysis:'The canonical Dutch flower painting: retrieved by an exact metadata query. The title, artist attribution, and classification all match a structured WHERE clause. De Heem is well-known enough to land in the Familiar half.',
+    analysis:'The canonical Dutch flower painting: retrieved by an exact metadata query. The title, artist attribution, and classification all match a structured WHERE clause. De Heem is well-known enough to land in the Mainstream half.',
     tags:["flowers", "bouquet", "dutch golden age", "baroque", "indoor", "floral", "still life"],
     spreadX:12, spreadY:10, focusedX:49, focusedY:50, baseSize:76, relevance:0.92, quadX:14, quadY:28,
   },
@@ -698,7 +699,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.45867.html',
     description:'In contrast to his structured landscapes, Cézanne\'s late flower paintings have a spontaneous warmth. The vase is solid, almost architectural; the blooms loosen into planes of pure colour. This is the work of an artist who never stopped testing the boundary between solidity and dissolution.',
-    analysis:'Another direct title-match retrieval — \'Vase of Flowers\' as a metadata query. Cézanne\'s name places it in the Familiar zone alongside de Heem.',
+    analysis:'Another direct title-match retrieval — \'Vase of Flowers\' as a metadata query. Cézanne\'s name places it in the Mainstream zone alongside de Heem.',
     tags:["flowers", "bouquet", "post-impressionist", "bold", "indoor", "still life"],
     spreadX:18, spreadY:16, focusedX:51, focusedY:49, baseSize:70, relevance:0.86, quadX:18, quadY:20,
   },
@@ -709,7 +710,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.42505.html',
     description:'An unattributed American still life from the 1870s — one of thousands of flower paintings made for drawing-room walls. The competent realism, soft pink against white, and casual arrangement speak to a domestic art culture that valued prettiness and craft above innovation.',
-    analysis:'A title match (\'roses\') in the metadata — structurally retrieved — but anonymous authorship and low exhibition history push it deep into the Novel zone. This is the kind of work buried under popularity weighting.',
+    analysis:'A title match (\'roses\') in the metadata — structurally retrieved — but anonymous authorship and low exhibition history push it deep into the Niche zone. This is the kind of work buried under popularity weighting.',
     tags:["flowers", "roses", "indoor", "still life", "delicate", "quiet"],
     spreadX:15, spreadY:78, focusedX:50, focusedY:52, baseSize:56, relevance:0.62, quadX:16, quadY:78,
   },
@@ -731,7 +732,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.30218.html',
     description:'Beatrix Whistler — wife and artistic companion of James McNeill Whistler — absorbed his delicate Japoniste aesthetic. The peach blossom branches dissolve into a pale ground, the petals barely distinguishable from air. A private, contemplative work, rarely reproduced.',
-    analysis:'Retrieved by the keyword \'blossom\' against the title field — a metadata match — but Beatrix Whistler carries almost no engagement history compared to her husband, placing this deep in the Novel zone.',
+    analysis:'Retrieved by the keyword \'blossom\' against the title field — a metadata match — but Beatrix Whistler carries almost no engagement history compared to her husband, placing this deep in the Niche zone.',
     tags:["flowers", "bloom", "impressionist", "delicate", "ethereal", "quiet", "indoor"],
     spreadX:22, spreadY:70, focusedX:50, focusedY:51, baseSize:54, relevance:0.64, quadX:24, quadY:72,
   },
@@ -742,7 +743,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.42928.html',
     description:'Blakelock painted the American wilderness with a romantic intensity bordering on the obsessive. This smaller domestic piece — his own garden — applies the same charged twilight palette to intimacy. The garden is shadowed by the knowledge that Blakelock eventually suffered a breakdown and spent years in an institution.',
-    analysis:'Retrieved by \'garden\' against the title metadata. Blakelock is a mid-tier American Romantic — known to specialists but absent from popular lists. The work sits in the Semantic-Novel quadrant: found by indexing, buried by ranking.',
+    analysis:'Retrieved by \'garden\' against the title metadata. Blakelock is a mid-tier American Romantic — known to specialists but absent from popular lists. The work sits in the Semantic-Niche quadrant: found by indexing, buried by ranking.',
     tags:["flowers", "outdoor", "romantic", "mysterious", "melancholy", "dramatic"],
     spreadX:28, spreadY:64, focusedX:49, focusedY:52, baseSize:56, relevance:0.65, quadX:26, quadY:65,
   },
@@ -764,7 +765,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.46184.html',
     description:'A characteristic Ruisdael: the sky takes up two-thirds of the canvas, the land a narrow stage below. Clouds mass and shift; light moves across the fields in patches. The painting was made to be owned, not studied — a portable piece of the Dutch countryside.',
-    analysis:'Retrieved by \'landscape\' classification — a pure metadata match. Low visibility score due to generic title and no exhibition prominence, placing it firmly in the Novel tier.',
+    analysis:'Retrieved by \'landscape\' classification — a pure metadata match. Low visibility score due to generic title and no exhibition prominence, placing it firmly in the Niche tier.',
     tags:["landscape", "outdoor", "dutch golden age", "serene", "quiet", "sky", "clouds"],
     spreadX:16, spreadY:78, focusedX:49, focusedY:52, baseSize:56, relevance:0.62, quadX:16, quadY:76,
   },
@@ -786,7 +787,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.51095.html',
     description:'The Judgment of Paris is merely a pretext for one of Claude\'s finest atmospheric landscapes. Three goddesses appear at dusk; the mountains dissolve into silver-grey distance; the river glows in dying light. Claude invented this visual mode and never stopped refining it.',
-    analysis:'Retrieved by artist name (\'Claude Lorrain\') and \'landscape\' classification — an academic metadata query. This particular work is less exhibited than his major set pieces, placing it in moderate-Novel territory.',
+    analysis:'Retrieved by artist name (\'Claude Lorrain\') and \'landscape\' classification — an academic metadata query. This particular work is less exhibited than his major set pieces, placing it in moderate-Niche territory.',
     tags:["landscape", "outdoor", "romantic", "luminous", "dreamlike", "golden", "classical"],
     spreadX:28, spreadY:56, focusedX:51, focusedY:51, baseSize:58, relevance:0.66, quadX:28, quadY:55,
   },
@@ -797,7 +798,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.56597.html',
     description:'Van Goyen worked in a tonal tradition that reduced landscape to near-monochrome: grey-gold skies, pale water, silhouettes of boats. His paintings were produced quickly and in large numbers — they were the affordable landscapes of the Dutch Golden Age, and they remain below the popular radar.',
-    analysis:'Retrieved by \'landscape\' and \'Dordrecht\' against the metadata. Van Goyen is a specialist name — low engagement scores despite artistic quality. A textbook Novel result: quality buried by popularity weighting.',
+    analysis:'Retrieved by \'landscape\' and \'Dordrecht\' against the metadata. Van Goyen is a specialist name — low engagement scores despite artistic quality. A textbook Niche result: quality buried by popularity weighting.',
     tags:["landscape", "seascape", "outdoor", "dutch golden age", "serene", "quiet", "water", "fog"],
     spreadX:18, spreadY:70, focusedX:50, focusedY:52, baseSize:56, relevance:0.64, quadX:18, quadY:72,
   },
@@ -808,7 +809,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.46005.html',
     description:'A country house glimpsed through park trees, the sky half-lit through breaking clouds. Ruisdael applies his characteristic tension: dead branches, living foliage, a house that may soon be overtaken by growth. Nature as entropy, not decoration.',
-    analysis:'Retrieved by \'park\' and \'landscape\' in title and classification. Low exhibition score for this particular Ruisdael — it sits in the deep Novel zone despite its quality.',
+    analysis:'Retrieved by \'park\' and \'landscape\' in title and classification. Low exhibition score for this particular Ruisdael — it sits in the deep Niche zone despite its quality.',
     tags:["landscape", "outdoor", "dutch golden age", "dramatic", "mysterious", "pastoral"],
     spreadX:22, spreadY:78, focusedX:50, focusedY:52, baseSize:54, relevance:0.6, quadX:24, quadY:78,
   },
@@ -819,7 +820,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.41645.html',
     description:'An old man on his deathbed hesitates between two choices: the angel urging him toward the cross at the window, and the demon offering a bag of gold. A skeleton death-figure enters the doorway. Bosch\'s moralizing allegory is delivered with the matter-of-fact realism of someone who has seen death many times.',
-    analysis:'Retrieved by \'death\' in the title field — a structured metadata match. Bosch is recognizable to general audiences (Familiar-leaning) but this specific panel is more familiar to specialists than the general public.',
+    analysis:'Retrieved by \'death\' in the title field — a structured metadata match. Bosch is recognizable to general audiences (Mainstream-leaning) but this specific panel is more familiar to specialists than the general public.',
     tags:["religious", "dramatic", "mysterious", "baroque", "dark", "indoor", "melancholy"],
     spreadX:20, spreadY:40, focusedX:50, focusedY:50, baseSize:66, relevance:0.78, quadX:18, quadY:40,
   },
@@ -830,7 +831,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.34047.html',
     description:'William Pitt collapsed in the House of Lords in 1778 while opposing American independence. Copley records the moment with documentary precision and theatrical staging — over 50 portraits of real parliamentarians in a single scene, each face a study in shock, grief, or ambition.',
-    analysis:'Retrieved by \'death\' in the title metadata. Copley is well-known in American art circles but this political history painting has low general engagement, placing it between Familiar and Novel.',
+    analysis:'Retrieved by \'death\' in the title metadata. Copley is well-known in American art circles but this political history painting has low general engagement, placing it between Mainstream and Niche.',
     tags:["portrait", "historical", "dramatic", "indoor", "melancholy", "bold"],
     spreadX:24, spreadY:52, focusedX:49, focusedY:51, baseSize:60, relevance:0.68, quadX:22, quadY:52,
   },
@@ -841,7 +842,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.41592.html',
     description:'The dead Christ is laid across his mother\'s lap in the traditional Pietà form, but Moretto brings unusually direct grief: the Virgin\'s face is drawn, not beatified; the body is heavy with death. This is sorrow without transcendence.',
-    analysis:'Retrieved by \'pietà\' — an art-historical term in the title field, a structured query. Moretto da Brescia is a niche Renaissance name, well below the familiarity threshold of popular audiences. This is deep Novel territory.',
+    analysis:'Retrieved by \'pietà\' — an art-historical term in the title field, a structured query. Moretto da Brescia is a niche Renaissance name, well below the familiarity threshold of popular audiences. This is deep Niche territory.',
     tags:["religious", "dramatic", "intimate", "melancholy", "baroque", "historical"],
     spreadX:16, spreadY:58, focusedX:50, focusedY:51, baseSize:56, relevance:0.64, quadX:16, quadY:58,
   },
@@ -852,7 +853,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.61391.html',
     description:'Blind Oedipus curses his son with an arm gesture that seems to shake the air. The extreme foreshortening, dramatic lighting, and anguished faces have a theatrical intensity that verges on the grotesque. Fuseli pushed Romantic painting toward the operatic and never looked back.',
-    analysis:'Retrieved by dramatic emotional keywords and classical subject matter in the metadata. Fuseli is a niche Romantic figure known to art historians — a Semantic-Novel result: findable by research, buried by engagement metrics.',
+    analysis:'Retrieved by dramatic emotional keywords and classical subject matter in the metadata. Fuseli is a niche Romantic figure known to art historians — a Semantic-Niche result: findable by research, buried by engagement metrics.',
     tags:["portrait", "religious", "dramatic", "mysterious", "expressionist", "baroque", "melancholy"],
     spreadX:28, spreadY:70, focusedX:51, focusedY:52, baseSize:56, relevance:0.62, quadX:28, quadY:70,
   },
@@ -863,7 +864,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.30221.html',
     description:'Blake\'s illustration to the Book of Job shows the patriarch after his ordeal — at peace with his daughters — yet even in happiness his figures carry an intensity that makes joy look effortful. The composition hovers between illustration and vision, dense with symbolic energy.',
-    analysis:'Retrieved by \'Job\' as a textual keyword — a title/subject metadata match. Blake is known for his illustrations and poetry, but this specific work is niche even among Blake specialists. Deep Novel territory.',
+    analysis:'Retrieved by \'Job\' as a textual keyword — a title/subject metadata match. Blake is known for his illustrations and poetry, but this specific work is niche even among Blake specialists. Deep Niche territory.',
     tags:["religious", "dramatic", "portrait", "outdoor", "ethereal", "melancholy", "symbolic"],
     spreadX:26, spreadY:76, focusedX:50, focusedY:52, baseSize:52, relevance:0.6, quadX:26, quadY:76,
   },
@@ -885,7 +886,7 @@ const ARTWORKS = [
     collection:'National Gallery of Art, Washington D.C.',
     ngaUrl:'https://www.nga.gov/collection/art-object-page.1182.html',
     description:'The fox hunt\'s conclusion is rendered without drama or triumph — just the tired hounds, the dead animal, the workmanlike end of a working morning. The sentimentalism that elsewhere mars Morland\'s work is here replaced by plain observation. A small painting of a small ending.',
-    analysis:'Retrieved by \'death\' in the title field — a structural metadata match. Morland is almost entirely unknown outside English rural-life specialists. This is a textbook Semantic-Novel result: found by indexing, invisible to engagement-based ranking.',
+    analysis:'Retrieved by \'death\' in the title field — a structural metadata match. Morland is almost entirely unknown outside English rural-life specialists. This is a textbook Semantic-Niche result: found by indexing, invisible to engagement-based ranking.',
     tags:["landscape", "outdoor", "romantic", "quiet", "melancholy", "pastoral"],
     spreadX:20, spreadY:82, focusedX:50, focusedY:52, baseSize:48, relevance:0.56, quadX:20, quadY:82,
   },
@@ -1006,7 +1007,7 @@ const ARTWORKS = [
     title:'The Large Cat', artist:'Cornelis Visscher', year:'c. 1657',
     medium:'engraving', dims:'overall: 24.5 x 19.8 cm (9 5/8 x 7 13/16 in.)',
     collection:'National Gallery of Art, Washington D.C.',
-    ngaUrl:'https://www.nga.gov/collection/art-object-page.4895.html',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.93311.html',
     description:'Visscher\'s engraving of a cat is among the most celebrated animal prints of the Dutch Golden Age. The animal is shown in a state of alert repose — ears forward, eyes half-closed, fur rendered tick by tick with extraordinary precision. It is a portrait in the fullest sense, the cat granted the same psychological weight as a human sitter.',
     analysis:'A direct title match: "cat" is the only subject and the only keyword. Visscher is a printmaking specialist known to graphic arts scholars — moderate familiarity within the expert tier, low general visibility.',
     tags:["cat", "feline", "animal", "pet", "dutch golden age", "intimate", "quiet", "realist", "portrait"],
@@ -1017,7 +1018,7 @@ const ARTWORKS = [
     title:'Woman with a Cat', artist:'Pierre-Auguste Renoir', year:'1875',
     medium:'oil on canvas', dims:'overall: 56 x 46.4 cm (22 1/16 x 18 1/4 in.)',
     collection:'National Gallery of Art, Washington D.C.',
-    ngaUrl:'https://www.nga.gov/collection/art-object-page.1157.html',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.37637.html',
     description:'A young woman cradles a grey cat against her shoulder. Renoir paints both with the same broken brushwork — fur and skin dissolved into the same warm light. The cat occupies the compositional centre, treated with an affection Renoir reserved for subjects he found genuinely beautiful. The animal is complicit, entirely at ease.',
     analysis:'A direct title match — "cat" in the title. Renoir\'s global recognition places this in the upper-familiar zone. The sensory surface — warm light, soft texture — makes it accessible both semantically and visually.',
     tags:["cat", "feline", "animal", "pet", "portrait", "impressionist", "intimate", "luminous", "indoor"],
@@ -1028,9 +1029,9 @@ const ARTWORKS = [
     title:"The Cat's Concert", artist:'Coryn Boel after David Teniers the Younger', year:'c. 1660',
     medium:'etching', dims:'overall: 23.4 x 30.8 cm (9 3/16 x 12 1/8 in.)',
     collection:'National Gallery of Art, Washington D.C.',
-    ngaUrl:'https://www.nga.gov/collection/art-object-page.62352.html',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.73922.html',
     description:"Cats assembled at a music stand, performing a concert in solemn parody of human music-making. Teniers painted several versions of this absurdist scene; Boel's etching spreads it as a popular print across Northern Europe. Each cat has a distinct personality — the conductor grave, the singer straining, the instrumentalists absorbed. The humor is affectionate rather than dismissive.",
-    analysis:'"Cat" is the primary title keyword — an unambiguous semantic match. Teniers is familiar to Flemish-art specialists; the animal-as-human genre gives this moderate general recognition. Sits at the Semantic-Familiar boundary.',
+    analysis:'"Cat" is the primary title keyword — an unambiguous semantic match. Teniers is familiar to Flemish-art specialists; the animal-as-human genre gives this moderate general recognition. Sits at the Semantic-Mainstream boundary.',
     tags:["cat", "feline", "animal", "pet", "indoor", "dutch golden age", "domestic", "quiet", "realist", "still life"],
     spreadX:22, spreadY:32, focusedX:50, focusedY:49, baseSize:68, relevance:0.80, quadX:22, quadY:32,
   },
@@ -1039,7 +1040,7 @@ const ARTWORKS = [
     title:'Lion', artist:'Peter Paul Rubens', year:'c. 1612/1615',
     medium:'black chalk on paper', dims:'overall: 25.1 x 26.7 cm (9 7/8 x 10 1/2 in.)',
     collection:'National Gallery of Art, Washington D.C.',
-    ngaUrl:'https://www.nga.gov/collection/art-object-page.52288.html',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.51133.html',
     description:'A study of a lion\'s head, drawn from life at a private menagerie. Rubens approaches the animal with the same analytical intensity he brought to human anatomy — every ridge of muscle, every coil of mane recorded in rapid chalk. The lion looks directly at the viewer, and there is no doubt about the terms of the encounter.',
     analysis:'Retrieved at high temperature when the system expands from domestic cats to the full feline family — lion as the apex cat, sharing the predatory stillness and intense forward gaze of the domestic animal. Rubens\'s fame places this in familiar territory.',
     tags:["cat", "feline", "animal", "lion", "dramatic", "realist", "baroque", "portrait", "bold"],
@@ -1050,11 +1051,66 @@ const ARTWORKS = [
     title:'Young Tiger Playing with its Mother', artist:'Eugène Delacroix', year:'c. 1830',
     medium:'oil on canvas', dims:'overall: 130.2 x 194.9 cm (51 1/4 x 76 3/4 in.)',
     collection:'National Gallery of Art, Washington D.C.',
-    ngaUrl:'https://www.nga.gov/collection/art-object-page.46490.html',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.6494.html',
     description:'Delacroix was obsessed with the big cats he drew from life at the Paris zoo and in the private menageries of collectors. Here a young tiger bats playfully at its recumbent mother — the scene is one of the most domestic moments he ever painted, the predator temporarily a kitten. The dappled light, loose posture, and physical contact carry an intimacy that the subject does not usually permit.',
     analysis:'Retrieved at high temperature when the search expands from domestic cats to the broader feline genus. The young tiger\'s playful posture — rolling, batting, relaxed — is the precise motion a cat owner recognises from their own floor. Delacroix\'s Romantic fame places this high on the familiar axis.',
     tags:["cat", "feline", "animal", "jaguar", "dramatic", "romantic", "bold", "energetic", "outdoor", "wild"],
     spreadX:84, spreadY:36, focusedX:54, focusedY:50, baseSize:66, relevance:0.78, quadX:84, quadY:36,
+  },
+  {
+    id:64, img:'https://api.nga.gov/iiif/69c3cd97-9d3c-4161-90b8-e5d9b22908a3/full/!400,400/0/default.jpg',
+    title:'The Virgin and Child with the Cat and Snake', artist:'Rembrandt van Rijn', year:'1654',
+    medium:'etching', dims:'overall: 15.6 x 14.4 cm (6 1/8 x 5 11/16 in.)',
+    collection:'National Gallery of Art, Washington D.C.',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.855.html',
+    description:'Mary holds the infant Christ as a cat bats at a snake writhing on the floor — the household animal granted the same presence as the sacred figures. Rembrandt sets the scene in a plain domestic interior, the holy family observed with the same unhurried attention he gave to his Amsterdam neighbours. The cat is entirely absorbed in the snake; the child watches the cat.',
+    analysis:'Direct title match — "cat" is named as a primary subject alongside the Virgin and Child. Rembrandt\'s global fame places this at the top of the familiarity axis despite it being a lesser-known work within his print oeuvre.',
+    tags:["cat", "feline", "animal", "religious", "dutch golden age", "intimate", "domestic", "realist"],
+    spreadX:12, spreadY:20, focusedX:50, focusedY:48, baseSize:66, relevance:0.88, quadX:12, quadY:20,
+  },
+  {
+    id:65, img:'https://api.nga.gov/iiif/e17dba2b-2491-47e9-89d7-eeff1a9f19e6/full/!400,400/0/default.jpg',
+    title:'Black Cat (Le chat noir)', artist:'Alphonse Legros', year:'c. 1861',
+    medium:'etching', dims:'overall: 12.2 x 16.8 cm (4 13/16 x 6 5/8 in.)',
+    collection:'National Gallery of Art, Washington D.C.',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.32657.html',
+    description:'A black cat rendered in spare, atmospheric etching — the animal is the sole subject, cropped close, its outline dissolving into the white of the page. Legros trained in Paris under Lecoq de Boisbaudran and later moved to London, where he became a key figure in the etching revival. His animal subjects are among his most directly observed works.',
+    analysis:'Direct title match — "cat" is the entire subject. Legros is a niche name known mainly to printmaking specialists and Victorian art historians, placing this deep in the Novel tier despite the clarity of the match.',
+    tags:["cat", "feline", "animal", "quiet", "intimate", "realist", "monochrome"],
+    spreadX:36, spreadY:76, focusedX:50, focusedY:50, baseSize:60, relevance:0.72, quadX:36, quadY:76,
+  },
+  {
+    id:66, img:'https://api.nga.gov/iiif/6f05ba7b-c9d6-49b5-a02c-659ff50808cf/full/!400,400/0/default.jpg',
+    title:'Cat Watching Caged Bird', artist:'Jacques Callot', year:'1628',
+    medium:'etching', dims:'overall: 6.7 x 9.2 cm (2 5/8 x 3 5/8 in.)',
+    collection:'National Gallery of Art, Washington D.C.',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.36805.html',
+    description:'A cat sits before a birdcage, transfixed by the occupant. Callot captures the animal\'s absolute focus in a few precise lines — the coiled attention, the stillness before the pounce. The caged bird is oblivious. The scene is a miniature moral drama: predator and prey separated by wire, the tension suspended indefinitely.',
+    analysis:'Direct title match — "cat" opens the title. Callot is a well-known Baroque printmaker, familiar to art history audiences, placing this in the moderate-familiar zone of the semantic quadrant.',
+    tags:["cat", "feline", "animal", "bird", "dramatic", "baroque", "quiet", "realist"],
+    spreadX:36, spreadY:32, focusedX:51, focusedY:47, baseSize:62, relevance:0.80, quadX:36, quadY:32,
+  },
+  {
+    id:67, img:'https://api.nga.gov/iiif/186b89a8-c9b4-47da-8cf7-40f4fe088719/full/!400,400/0/default.jpg',
+    title:'Julie Manet Holding a Cat', artist:'Berthe Morisot, after Auguste Renoir', year:'1889',
+    medium:'drypoint', dims:'overall: 20.3 x 14.8 cm (8 x 5 13/16 in.)',
+    collection:'National Gallery of Art, Washington D.C.',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.42648.html',
+    description:'Morisot\'s drypoint after Renoir\'s painting shows her daughter Julie cradling a large cat against her chest. The child\'s grip is confident and the cat is entirely at ease — two bodies accustomed to each other. The drypoint medium gives the image a velvety softness that suits the subject\'s intimacy.',
+    analysis:'Direct title match — "cat" is named alongside the sitter. Morisot is a recognised Impressionist name; the work\'s status as a drypoint after Renoir adds a second familiar reference point, placing this in the upper-moderate familiarity zone.',
+    tags:["cat", "feline", "animal", "portrait", "impressionist", "intimate", "indoor", "child"],
+    spreadX:16, spreadY:46, focusedX:50, focusedY:49, baseSize:64, relevance:0.82, quadX:16, quadY:46,
+  },
+  {
+    id:68, img:'https://api.nga.gov/iiif/488a47b9-b277-47ac-98d7-cfea0dda0391/full/!400,400/0/default.jpg',
+    title:'Cat and Kittens', artist:'American 19th Century', year:'c. 1872/1883',
+    medium:'oil on millboard', dims:'overall: 26.5 x 35.2 cm (10 7/16 x 13 7/8 in.)',
+    collection:'National Gallery of Art, Washington D.C.',
+    ngaUrl:'https://www.nga.gov/collection/art-object-page.45859.html',
+    description:'A tabby cat nurses her kittens on what appears to be a domestic surface — a shelf, a windowsill, a step. The painting is entirely unsentimental: it records the animals as they are, the mother watchful, the kittens blind and bundled. Anonymous and unhurried, it is the kind of work made for love of the subject rather than exhibition.',
+    analysis:'Direct title match — "cat" opens the title. Anonymous attribution and no exhibition record produce the lowest possible familiarity score — a textbook example of a work buried by engagement-weighted ranking. Only a de-biased retrieval surfaces it.',
+    tags:["cat", "feline", "animal", "kitten", "folk", "domestic", "quiet", "intimate", "realist"],
+    spreadX:14, spreadY:84, focusedX:50, focusedY:52, baseSize:62, relevance:0.68, quadX:14, quadY:84,
   },
 ];
 
@@ -1064,23 +1120,23 @@ function clamp(v,lo,hi) { return Math.max(lo,Math.min(hi,v)); }
 // ─── Query presets — simulated retrieval modes ────────────────────────────────
 // X axis: Semantic (left) = keyword appears in title / subject label
 //         Sensory  (right) = keyword is visually present in the depicted scene
-// Y axis: Familiar (top) = well-known artist, high engagement
-//         Novel   (bottom) = obscure artist, buried by popularity-weighted ranking
+// Y axis: Mainstream (top) = well-known artist, high engagement
+//         Niche   (bottom) = obscure artist, buried by popularity-weighted ranking
 const QUERY_PRESETS = {
   flowers: [
     // Semantic — the word "flower / rose / bloom / blossom / garden" is in the title
     { id:30, x:12, y:12, reason:'The title "Vase of Flowers" is a direct keyword match in the title metadata field — this is exactly what a structured query WHERE title CONTAINS \'flower\' returns. De Heem\'s canonical status as a Dutch flower painter lifts it to the top of the familiarity ranking.' },
     { id:31, x:18, y:20, reason:'"Vase of Flowers" in the title is the same metadata hit as de Heem. Cézanne\'s higher global recognition gives this a stronger familiarity score, ranking it just above the de Heem in most engagement-weighted systems.' },
-    { id:34, x:22, y:64, reason:'"Blossom" in the title matches the floral keyword taxonomy. Beatrix Whistler — wife of James McNeill Whistler — carries almost no independent engagement history, placing this work deep in the Novel tier despite its quality.' },
+    { id:34, x:22, y:64, reason:'"Blossom" in the title matches the floral keyword taxonomy. Beatrix Whistler — wife of James McNeill Whistler — carries almost no independent engagement history, placing this work deep in the Niche tier despite its quality.' },
     { id:35, x:28, y:56, reason:'"Garden" in the title matches the botanical subject index. Blakelock\'s limited exhibition record means this result would be suppressed entirely by a popularity-weighted ranking — only a de-biased retrieval surfaces it.' },
     { id:32, x:14, y:78, reason:'"Roses" is a direct botanical keyword hit in the title. Anonymous attribution and no exhibition record produce the minimum familiarity score — a textbook example of a work buried by engagement-weighted ranking.' },
-    { id:33, x:20, y:84, reason:'"Flowers" appears literally in the title — the strongest possible semantic signal. Zero attribution and no provenance history place this at the absolute Novel extreme.' },
+    { id:33, x:20, y:84, reason:'"Flowers" appears literally in the title — the strongest possible semantic signal. Zero attribution and no provenance history place this at the absolute Niche extreme.' },
     // Sensory — flowers are visually present in the scene, but not mentioned in the title
     { id:1,  x:72, y:10, reason:'The title "The Alba Madonna" names a person, not a subject. This appears because the Madonna is seated in a meadow filled with identifiable flowering plants at her feet — botanical detail that registers strongly in a visual embedding search on floral content.' },
     { id:9,  x:80, y:24, reason:'The title names a person. This appears because Gainsborough deliberately dissolves the sitter\'s figure into the surrounding flowering garden — her dress and the blossoms are painted as one continuous surface. The visual embedding is strongly botanical even though no flower word exists in the metadata.' },
     { id:10, x:70, y:32, reason:'The title names a building. This appears because the entire foreground is a wildflower meadow — clover, buttercup, meadow grasses — that visually dominates the lower half of the canvas. A vector search on floral imagery weights these depicted elements, not the title.' },
     { id:39, x:76, y:50, reason:'The title names a mythological event. This appears because the setting is a lush flowering pastoral landscape; Claude fills the foreground with botanical detail that generates a strong floral signal in vector space, even though the myth is what\'s catalogued.' },
-    { id:16, x:74, y:58, reason:'"Forest" — not "flowers" — is the title keyword. This appears because spring blossoms visible in the canopy and undergrowth produce a floral embedding signal. The work\'s low exhibition prominence places it in the Novel-sensory quadrant.' },
+    { id:16, x:74, y:58, reason:'"Forest" — not "flowers" — is the title keyword. This appears because spring blossoms visible in the canopy and undergrowth produce a floral embedding signal. The work\'s low exhibition prominence places it in the Niche-sensory quadrant.' },
     // Exploratory — garden environments, pollinators, botanical plant life (high temperature only)
     { id:49, x:78, y:12, reason:'The title names a garden activity, not a botanical subject. Surfaces at high temperature because the depicted scene is a flower garden — identifiable geraniums, daisies, and summer blooms surround the girl and dominate the visual field. Renoir\'s fame anchors this to the top of the familiarity axis.' },
     { id:50, x:76, y:26, reason:'The title names a person\'s garden and a location. Surfaces at high temperature because the visual content is an overwhelming mass of tall hollyhocks and flowering plants lining a garden path — the architecture of flowers rather than a bouquet. Monet\'s name places this in the familiar zone.' },
@@ -1100,9 +1156,9 @@ const QUERY_PRESETS = {
     { id:36, x:20, y:36, reason:'"Forest" and "Scene" both match nature-related subject terms in the metadata index. Ruisdael is classified under Dutch landscape painters — a research-tier familiar name.' },
     { id:8,  x:28, y:16, reason:'"Valley" in the title matches the landscape subject taxonomy. Inness is indexed under American Luminist landscape painters; his moderate familiarity places this in the upper half.' },
     { id:16, x:24, y:54, reason:'"Forest" in the title is a direct nature keyword match. Corot\'s Barbizon School classification also confirms an outdoor landscape tradition in the metadata. Lower familiarity than the canonical names above.' },
-    { id:40, x:18, y:68, reason:'"View" in the title triggers the landscape scene classification. Van Goyen\'s low exhibition prominence places this in the Novel tier despite strong art-historical significance — suppressed by engagement-weighted ranking.' },
-    { id:37, x:14, y:76, reason:'The title IS the keyword — "Landscape" is both the subject and the label. Maximum semantic confidence, but a generic title also signals minimal metadata richness. Low engagement score pushes it deep Novel.' },
-    { id:41, x:22, y:82, reason:'"Park" in the title matches the green-space taxonomy in the subject index. Almost no exhibition footprint places this at the Novel extreme — invisible under any popularity-based ranking.' },
+    { id:40, x:18, y:68, reason:'"View" in the title triggers the landscape scene classification. Van Goyen\'s low exhibition prominence places this in the Niche tier despite strong art-historical significance — suppressed by engagement-weighted ranking.' },
+    { id:37, x:14, y:76, reason:'The title IS the keyword — "Landscape" is both the subject and the label. Maximum semantic confidence, but a generic title also signals minimal metadata richness. Low engagement score pushes it deep Niche.' },
+    { id:41, x:22, y:82, reason:'"Park" in the title matches the green-space taxonomy in the subject index. Almost no exhibition footprint places this at the Niche extreme — invisible under any popularity-based ranking.' },
     // Sensory — nature visually dominates but the title names a place, person, or myth
     { id:7,  x:88, y:14, reason:'"Venice" is a city name — no nature keyword in the title. This appears because the painting is almost entirely sky, water, and atmospheric haze — elemental nature rendered as pure sensation. Turner\'s fame places it at the top of the sensory-familiar zone.' },
     { id:27, x:84, y:26, reason:'"Mortlake Terrace" names a specific location. This appears because the visual content is a dawn mist rising off the Thames — the natural atmosphere is the real subject; the terrace is incidental.' },
@@ -1114,12 +1170,12 @@ const QUERY_PRESETS = {
   ],
   sadness: [
     // Semantic — "death / pietà / cursing / lamentation" is in the title or subject label
-    { id:42, x:16, y:28, reason:'"Death" appears directly in the title — an exact metadata keyword match for a sadness query. Bosch\'s recognisability places this in the upper-Familiar tier of semantic results.' },
-    { id:43, x:20, y:46, reason:'"Death" in the title is a direct metadata match. Well-known in American art history but low general engagement places this mid-Novel — a result that surfaces in research contexts but not in popularity-weighted lists.' },
+    { id:42, x:16, y:28, reason:'"Death" appears directly in the title — an exact metadata keyword match for a sadness query. Bosch\'s recognisability places this in the upper-Mainstream tier of semantic results.' },
+    { id:43, x:20, y:46, reason:'"Death" in the title is a direct metadata match. Well-known in American art history but low general engagement places this mid-Niche — a result that surfaces in research contexts but not in popularity-weighted lists.' },
     { id:44, x:14, y:62, reason:'"Pietà" is an art-historical subject term meaning the Virgin\'s grief over Christ\'s body — it functions as a metadata tag for mourning and lamentation. Moretto da Brescia is almost entirely unknown to general audiences.' },
     { id:45, x:24, y:70, reason:'"Cursing" in the title registers as anguish and emotional violence in the subject index. Fuseli is a specialist Romantic name with minimal mainstream visibility — deeply suppressed by engagement-weighted ranking.' },
     { id:46, x:28, y:76, reason:'"Job" is indexed as a biblical suffering narrative — a metadata tag for grief and endurance. Blake is known for his poetry; this specific work has almost no exhibition history.' },
-    { id:48, x:18, y:84, reason:'"Death" in the title is the semantic trigger. George Morland is virtually unknown outside English rural-life specialists — the maximum Novel placement in this result set.' },
+    { id:48, x:18, y:84, reason:'"Death" in the title is the semantic trigger. George Morland is virtually unknown outside English rural-life specialists — the maximum Niche placement in this result set.' },
     // Sensory — sadness is in the visual tone, expression, or depicted scene; not in the title
     { id:3,  x:72, y:10, reason:'"Self-Portrait" contains no sadness keyword. This appears because the visual content carries overwhelming emotional weight — an aging face, loss written in the gaze, warmth dissolving into shadow. Sadness as visual fact, not label. Rembrandt\'s fame places it at the top.' },
     { id:11, x:68, y:24, reason:'A fashionable portrait by title. This appears because the sitter\'s expression carries a quality of wistfulness — a low-valence emotional signal in a multimodal embedding — that no metadata field records. Sadness is in the gaze, not the catalogue entry.' },
@@ -1130,11 +1186,16 @@ const QUERY_PRESETS = {
   ],
   cats: [
     // Semantic — "cat" is in the title (left side, x < 50)
-    { id:60, x:28, y:12, reason:'"Cat" appears in the title — a direct keyword match. Renoir\'s global recognition places this in the upper-Familiar tier. The work is semantically unambiguous: the cat is a named subject.' },
-    { id:61, x:38, y:44, reason:'"Cat" is the primary title keyword — an unambiguous semantic match. Teniers is familiar to Flemish-art specialists; the animal-as-human genre gives this moderate general recognition, placing the work at the Semantic-Familiar boundary.' },
-    { id:59, x:22, y:74, reason:'"Cat" is the entire title — maximum semantic confidence. Visscher is a printmaking specialist known to graphic-arts scholars but not to general audiences, placing this in the Semantic-Novel zone despite the directness of the match.' },
+    { id:60, x:28, y:10, reason:'"Cat" appears in the title — a direct keyword match. Renoir\'s global recognition places this at the top of the familiarity axis. The work is semantically unambiguous: the cat is a named subject.' },
+    { id:64, x:14, y:18, reason:'"Cat" is named as a primary subject in the title alongside the Virgin and Child. Rembrandt\'s global fame anchors this at the top of the familiarity axis despite it being a lesser-known work within his print oeuvre.' },
+    { id:66, x:38, y:30, reason:'"Cat" opens the title. Callot is a well-known Baroque printmaker familiar to art history audiences, placing this in the moderate-familiar zone of the semantic quadrant.' },
+    { id:67, x:18, y:42, reason:'"Cat" is named alongside the sitter. Morisot is a recognised Impressionist name; the work\'s status as a drypoint after Renoir adds a second familiar reference point.' },
+    { id:61, x:36, y:54, reason:'"Cat" is the primary title keyword — an unambiguous semantic match. Teniers is familiar to Flemish-art specialists; the animal-as-human genre gives this moderate general recognition.' },
+    { id:59, x:26, y:66, reason:'"Cat" is the entire title — maximum semantic confidence. Visscher is a printmaking specialist known to graphic-arts scholars but not to general audiences, placing this in the Semantic-Niche zone.' },
+    { id:65, x:38, y:78, reason:'"Cat" is the entire title. Legros is a niche name known mainly to printmaking specialists, placing this deep in the Niche tier despite the directness of the match.' },
+    { id:68, x:14, y:88, reason:'"Cat" opens the title. Anonymous attribution and no exhibition record produce the lowest familiarity score — a textbook example of a work buried by engagement-weighted ranking.' },
     // Sensory — feline is visually present; title names something else (right side, x > 50)
-    { id:62, x:60, y:10, reason:'The title says "Lion" — but the lion is the apex member of the feline family, sharing the same forward gaze, coiled posture, and predatory stillness as the domestic cat. A visual embedding on feline anatomy scores this at the top of the sensory axis. Rubens places it in the Familiar zone.' },
+    { id:62, x:60, y:10, reason:'The title says "Lion" — but the lion is the apex member of the feline family, sharing the same forward gaze, coiled posture, and predatory stillness as the domestic cat. A visual embedding on feline anatomy scores this at the top of the sensory axis. Rubens places it in the Mainstream zone.' },
     { id:63, x:64, y:28, reason:'The title names a tiger — the largest member of the feline family, sharing the same anatomy, motion, and hunting instinct as the domestic cat. The young tiger\'s playful posture in this painting is indistinguishable from a kitten at play. Delacroix\'s Romantic fame places this high on the familiar axis.' },
     { id:9,  x:70, y:44, reason:'The title names a location, not an animal. This appears because Dutch courtyard scenes of this period frequently include cats as incidental figures in the domestic space. The quiet, observant atmosphere — sunlit, unhurried — registers in the same embedding space as feline domestic presence.' },
     { id:2,  x:74, y:12, reason:'The title is a portrait description with no animal keyword. This appears because the sitter\'s expression — alert, composed, watching — carries the same quality of contained attention that a visual embedding on feline subjects scores as a cat-like affect. Vermeer places it at the top of the familiarity axis.' },
@@ -1212,7 +1273,7 @@ function QuadrantMap({ quadX, quadY }) {
 function PositionMap({ posX, posY }) {
   return (
     <div className="qmap-outer">
-      <div style={{ textAlign:'center', fontSize:8, color:'#d1d5dc', marginBottom:3, letterSpacing:'0.05em', textTransform:'uppercase' }}>Familiar</div>
+      <div style={{ textAlign:'center', fontSize:8, color:'#d1d5dc', marginBottom:3, letterSpacing:'0.05em', textTransform:'uppercase' }}>Mainstream</div>
       <div className="qmap-grid">
         <div style={{ background:'rgba(2,132,199,0.04)' }} />
         <div style={{ background:'rgba(201,169,110,0.05)' }} />
@@ -1222,7 +1283,7 @@ function PositionMap({ posX, posY }) {
         <div className="qmap-ax qmap-ax-y" />
         <div className="qmap-dot" style={{ left:`${posX}%`, top:`${posY}%` }} />
       </div>
-      <div style={{ textAlign:'center', fontSize:8, color:'#d1d5dc', marginTop:3, marginBottom:2, letterSpacing:'0.05em', textTransform:'uppercase' }}>Novel</div>
+      <div style={{ textAlign:'center', fontSize:8, color:'#d1d5dc', marginTop:3, marginBottom:2, letterSpacing:'0.05em', textTransform:'uppercase' }}>Niche</div>
       <div className="qmap-lbl">
         <span>By Name</span>
         <span>By Vibe</span>
@@ -1466,8 +1527,8 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
 
 
         {/* ── Static axis end labels ── */}
-        <span className="axis-label" style={{ top:22,left:'50%',transform:'translateX(-50%)' }}>Familiar</span>
-        <span className="axis-label" style={{ bottom:22,left:'50%',transform:'translateX(-50%)' }}>Novel</span>
+        <span className="axis-label" style={{ top:22,left:'50%',transform:'translateX(-50%)' }}>Mainstream</span>
+        <span className="axis-label" style={{ bottom:22,left:'50%',transform:'translateX(-50%)' }}>Niche</span>
         <span className="axis-label" style={{ left:22,top:'50%',transform:'translateY(-50%)' }}>By Name</span>
         <span className="axis-label" style={{ right:22,top:'50%',transform:'translateY(-50%)' }}>By Vibe</span>
 
@@ -1561,7 +1622,8 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
         })()}
       </div>
 
-      {/* Footer — focused/exploratory slider (same component as landing for consistency) */}
+
+      {/* Footer — focused/exploratory slider */}
       <footer style={{ height:FOOTER_H,flexShrink:0,background:'#fff',borderTop:'1px solid #e5e7eb',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'flex-start',paddingTop:36,zIndex:20 }}>
         <TickSlider value={temperature} onChange={setTemperature} theme="light" wrapStyle={{ marginTop:0,animation:'none',width:'min(580px,calc(100vw - 48px))' }} />
       </footer>
@@ -1580,13 +1642,37 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
       {showInfo && (
         <>
           <div style={{ position:'fixed',inset:0,zIndex:400,background:'rgba(0,0,0,0.45)' }} onClick={()=>setShowInfo(false)} />
-          <div style={{ position:'fixed',left:'50%',top:'50%',transform:'translate(-50%,-50%)',zIndex:401,width:'min(1100px,94vw)',background:'#fff',borderRadius:20,border:'1.5px solid #d1d5dc',boxShadow:'0 25px 50px -12px rgba(0,0,0,0.22)',overflow:'hidden' }}>
-            <button onClick={()=>setShowInfo(false)} style={{ position:'absolute',top:16,right:16,display:'inline-flex',alignItems:'center',gap:4,background:'#fff',border:'1.5px solid #d1d5dc',borderRadius:999,padding:'7px 14px 7px 11px',cursor:'pointer',fontFamily:'Inter,sans-serif',fontSize:13,color:'#858585',zIndex:2,transition:'background 0.15s' }}
-              onMouseEnter={e=>e.currentTarget.style.background='#f9fafb'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-              Close
-            </button>
-            <img src="quadrant-diagram.png" alt="Quadrant diagram" style={{ display:'block',width:'100%',height:'auto',padding:'48px 0' }} />
+          <div className="info-modal" style={{ position:'fixed',left:'50%',top:'50%',transform:'translate(-50%,-50%)',zIndex:401,width:'min(1100px,94vw)',maxHeight:'88vh',background:'#fff',borderRadius:20,border:'1.5px solid #d1d5dc',boxShadow:'0 25px 50px -12px rgba(0,0,0,0.22)',overflowY:'auto',overflowX:'hidden',display:'flex',flexDirection:'column',scrollbarWidth:'none',msOverflowStyle:'none' }}>
+            {/* Sticky close bar */}
+            <div style={{ position:'sticky',top:0,zIndex:10,background:'#fff',display:'flex',justifyContent:'flex-end',padding:'14px 16px 0',borderRadius:'20px 20px 0 0' }}>
+              <button onClick={()=>setShowInfo(false)} style={{ display:'inline-flex',alignItems:'center',gap:4,background:'#fff',border:'1.5px solid #d1d5dc',borderRadius:999,padding:'7px 14px 7px 11px',cursor:'pointer',fontFamily:'Inter,sans-serif',fontSize:13,color:'#858585',transition:'background 0.15s' }}
+                onMouseEnter={e=>e.currentTarget.style.background='#f9fafb'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                Close
+              </button>
+            </div>
+            {/* Description header */}
+            <div style={{ padding:'24px 56px 32px',borderBottom:'1px solid #f0f0f0' }}>
+              <h2 style={{ fontFamily:'Inter,sans-serif',fontWeight:500,fontSize:22,color:'#111',marginBottom:12,letterSpacing:'-0.02em' }}>What am I looking at?</h2>
+              <p style={{ fontFamily:'Inter,sans-serif',fontWeight:400,fontSize:14,lineHeight:1.7,color:'#6b7280',maxWidth:680 }}>
+                This canvas maps artworks along two dimensions. The horizontal axis shows how works were retrieved: name-based matches on the left, vibe-based matches on the right. The vertical axis reflects familiarity, with mainstream iconic works at the top and more niche, lesser-known works at the bottom.
+              </p>
+              <div style={{ display:'flex',gap:24,marginTop:20,flexWrap:'wrap' }}>
+                {[
+                  { name:'Curated Canon', color:'#d1e8d0', desc:'Iconic works, direct matches' },
+                  { name:'Moodboard', color:'#cde3f5', desc:'Popular trends, vibe-based matches' },
+                  { name:'Niche Deep-Dive', color:'#fde9cc', desc:'Rare archival works, in-depth research' },
+                  { name:'Hidden Gems', color:'#fad5db', desc:'Purely visual discovery, unexpected finds' },
+                ].map(q=>(
+                  <div key={q.name} style={{ display:'flex',alignItems:'center',gap:8 }}>
+                    <div style={{ width:12,height:12,borderRadius:3,background:q.color,flexShrink:0 }} />
+                    <span style={{ fontFamily:'Inter,sans-serif',fontSize:13,color:'#374151' }}><strong>{q.name}</strong> — {q.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Matrix image */}
+            <img src="quadrant-diagram.png" alt="Quadrant diagram" style={{ display:'block',width:'100%',height:'auto',padding:'40px 0 48px' }} />
           </div>
         </>
       )}
