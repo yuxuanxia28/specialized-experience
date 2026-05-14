@@ -1449,7 +1449,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
   const [failedIds,setFailedIds]     = useState(new Set());
   const [hoveredId,setHoveredId]     = useState(null);
   const [selectedId,setSelectedId]   = useState(null);
-  const [tooltipPos,setTooltipPos]   = useState({ x:0,y:0 });
+  const [repOffsets,setRepOffsets]   = useState({});
   const [searchQuery,setSearchQuery] = useState(initialQuery||'');
   const [pan,setPan]                 = useState({ x:0,y:0 });
   const [isDragging,setIsDragging]   = useState(false);
@@ -1461,9 +1461,11 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
   // custom tags: { [artworkId]: string[] }
   const [customTagsMap,setCustomTagsMap] = useState({});
 
-  const pickerBtnRef = useRef(null);
-  const dragStart    = useRef(null);
-  const touchStart   = useRef(null);
+  const pickerBtnRef  = useRef(null);
+  const dragStart     = useRef(null);
+  const touchStart    = useRef(null);
+  const repulsionRef  = useRef({});
+  const rafRef        = useRef(null);
   const canvasRef    = useRef(null);
   const zoomRef      = useRef(1);
 
@@ -1544,12 +1546,53 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
     setPan({ x: (0.5 - avgX/100) * zoomRef.current * W, y: (0.5 - avgY/100) * zoomRef.current * H });
   }, [visibleSet]);
 
+  // ── Repulsion physics ──────────────────────────────────────────────────────
+  useEffect(()=>{
+    if(rafRef.current) cancelAnimationFrame(rafRef.current);
+    let hx=50,hy=50;
+    if(hoveredId){
+      const ha=ARTWORKS.find(a=>a.id===hoveredId);
+      const hp=presetById?.[hoveredId];
+      hx=hp?hp.x:(ha?.spreadX??50); hy=hp?hp.y:(ha?.spreadY??50);
+    }
+    for(const a of ARTWORKS){
+      if(!visibleSet.has(a.id)) continue;
+      const r=repulsionRef.current[a.id]||{dx:0,dy:0,vx:0,vy:0,tdx:0,tdy:0};
+      let tdx=0,tdy=0;
+      if(hoveredId&&a.id!==hoveredId){
+        const hp=presetById?.[a.id];
+        const nx=hp?hp.x:a.spreadX,ny=hp?hp.y:a.spreadY;
+        const ddx=nx-hx,ddy=ny-hy,d=Math.sqrt(ddx*ddx+ddy*ddy);
+        if(d<28&&d>0.1){const f=8*(1-d/28);tdx=ddx/d*f;tdy=ddy/d*f;}
+      }
+      repulsionRef.current[a.id]={...r,tdx,tdy};
+    }
+    const tick=()=>{
+      let alive=false;
+      const next={};
+      for(const a of ARTWORKS){
+        if(!visibleSet.has(a.id)){repulsionRef.current[a.id]={dx:0,dy:0,vx:0,vy:0,tdx:0,tdy:0};continue;}
+        let {dx,dy,vx,vy,tdx,tdy}=repulsionRef.current[a.id]||{dx:0,dy:0,vx:0,vy:0,tdx:0,tdy:0};
+        vx=(vx+(tdx-dx)*0.1)*0.74; vy=(vy+(tdy-dy)*0.1)*0.74;
+        dx+=vx; dy+=vy;
+        repulsionRef.current[a.id]={dx,dy,vx,vy,tdx,tdy};
+        next[a.id]={dx,dy};
+        if(Math.abs(vx)>0.01||Math.abs(vy)>0.01) alive=true;
+      }
+      setRepOffsets({...next});
+      if(alive) rafRef.current=requestAnimationFrame(tick);
+    };
+    rafRef.current=requestAnimationFrame(tick);
+    return()=>{if(rafRef.current)cancelAnimationFrame(rafRef.current);};
+  },[hoveredId,visibleSet,presetById]);
+
   zoomRef.current = zoom;
   const rankById = Object.fromEntries(scoredArtworks.map((a,i)=>[a.id,i]));
-  const hoveredArtwork  = ARTWORKS.find(a=>a.id===hoveredId)||null;
   const selectedArtwork = ARTWORKS.find(a=>a.id===selectedId)||null;
   const zoomPct = Math.round(zoom*100);
   const HEADER_H=87, FOOTER_H=100;
+  const SIZE_THRESH=0.35;
+  const sizeMultiplier=temperature<SIZE_THRESH?1.8+(1-temperature/SIZE_THRESH)*1.0:1.8;
 
   return (
     <div className="screen-enter" style={{ width:'100vw',height:'100vh',display:'flex',flexDirection:'column',overflow:'hidden' }}>
@@ -1600,45 +1643,49 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
           <div className="axis-center-y" />
           {ARTWORKS.map((artwork,i)=>{
             const preset=presetById?.[artwork.id];
-            const x = preset ? preset.x : artwork.spreadX;
-            const y = preset ? preset.y : artwork.spreadY;
-            const SIZE_THRESH = 0.35;
-            const sizeMultiplier = temperature < SIZE_THRESH
-              ? 1.8 + (1 - temperature / SIZE_THRESH) * 1.0
-              : 1.8;
-            const size=artwork.baseSize * sizeMultiplier;
+            const x=preset?preset.x:artwork.spreadX;
+            const y=preset?preset.y:artwork.spreadY;
+            const rdx=repOffsets[artwork.id]?.dx||0, rdy=repOffsets[artwork.id]?.dy||0;
+            const size=artwork.baseSize*sizeMultiplier;
             const imgInfo=imageSizes[artwork.id];
             let nodeW=size,nodeH=size;
-            if(imgInfo){ const r=imgInfo.w/imgInfo.h; if(r>1) nodeH=Math.round(size/r); else nodeW=Math.round(size*r); }
-            const isVisible=visibleSet.has(artwork.id)&&!failedIds.has(artwork.id), isHovered=artwork.id===hoveredId, isSelected=artwork.id===selectedId;
+            if(imgInfo){const r=imgInfo.w/imgInfo.h;if(r>1)nodeH=Math.round(size/r);else nodeW=Math.round(size*r);}
+            const isVisible=visibleSet.has(artwork.id)&&!failedIds.has(artwork.id),isHovered=artwork.id===hoveredId,isSelected=artwork.id===selectedId;
             const rank=rankById[artwork.id]??i;
             const finalOp=loaded&&isVisible?1:0;
+            const imgScale=isHovered?1.6:isSelected?1.18:1;
             return (
               <div key={artwork.id} className="artwork-node" style={{
-                left:`${x}%`,top:`${y}%`,width:nodeW,height:nodeH,
+                left:`${x+rdx}%`,top:`${y+rdy}%`,width:nodeW,height:nodeH,
                 opacity:finalOp,
-                transform:`translate(-50%,-50%) scale(${isHovered||isSelected?1.18:1})`,
-                boxShadow:isSelected?'0 20px 30px -6px rgba(0,0,0,0.22),0 0 0 2.5px rgba(201,169,110,0.8)':isHovered?'0 20px 30px -6px rgba(0,0,0,0.22),0 8px 12px -4px rgba(0,0,0,0.14)':'0 10px 15px -3px rgba(0,0,0,0.10)',
+                transform:'translate(-50%,-50%)',
+                overflow:'visible',
                 transition:[
-                  `left ${loaded?0.65:0}s cubic-bezier(0.34,1.56,0.64,1)`,
-                  `top ${loaded?0.65:0}s cubic-bezier(0.34,1.56,0.64,1)`,
+                  `left ${hoveredId?0:loaded?0.65:0}s cubic-bezier(0.34,1.56,0.64,1)`,
+                  `top ${hoveredId?0:loaded?0.65:0}s cubic-bezier(0.34,1.56,0.64,1)`,
                   `width ${loaded?0.55:0}s cubic-bezier(0.34,1.56,0.64,1)`,
                   `height ${loaded?0.55:0}s cubic-bezier(0.34,1.56,0.64,1)`,
                   `opacity 0.5s ease ${loaded?rank*35:(1-artwork.relevance)*600}ms`,
-                  `transform 0.22s cubic-bezier(0.34,1.56,0.64,1)`,
-                  `box-shadow 0.22s ease`,
                 ].join(', '),
                 zIndex:isHovered||isSelected?50:Math.round((1-rank/ARTWORKS.length)*10),
                 pointerEvents:isVisible?'auto':'none',
               }}
-                onMouseEnter={e=>{ setHoveredId(artwork.id); setTooltipPos({x:e.clientX,y:e.clientY}); }}
-                onMouseMove={e=>setTooltipPos({x:e.clientX,y:e.clientY})}
+                onMouseEnter={()=>setHoveredId(artwork.id)}
                 onMouseLeave={()=>setHoveredId(null)}
                 onClick={()=>{ if(!isDragging) setSelectedId(s=>s===artwork.id?null:artwork.id); }}
               >
-                <img src={artwork.img} alt={artwork.title}
-                  onLoad={e=>{ const {naturalWidth:w,naturalHeight:h}=e.target; setImageSizes(p=>({...p,[artwork.id]:{w,h}})); }}
-                  onError={()=>{ setFailedIds(s=>{ const n=new Set(s); n.add(artwork.id); return n; }); }} />
+                <div style={{ width:'100%',height:'100%',borderRadius:6,overflow:'hidden',transform:`scale(${imgScale})`,transformOrigin:'center center',transition:'transform 0.35s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.22s ease',boxShadow:isSelected?'0 20px 30px -6px rgba(0,0,0,0.22),0 0 0 2.5px rgba(201,169,110,0.8)':isHovered?'0 20px 30px -6px rgba(0,0,0,0.22),0 8px 12px -4px rgba(0,0,0,0.14)':'0 10px 15px -3px rgba(0,0,0,0.10)',willChange:'transform' }}>
+                  <img src={artwork.img} alt={artwork.title} style={{ display:'block',width:'100%',height:'100%',objectFit:'cover',borderRadius:6,background:'#f3f4f6',pointerEvents:'none' }}
+                    onLoad={e=>{ const {naturalWidth:w,naturalHeight:h}=e.target; setImageSizes(p=>({...p,[artwork.id]:{w,h}})); }}
+                    onError={()=>{ setFailedIds(s=>{ const n=new Set(s); n.add(artwork.id); return n; }); }} />
+                </div>
+                {isHovered&&!isSelected&&(
+                  <div style={{ position:'absolute',left:'50%',top:`${Math.round(nodeH*1.3)+12}px`,transform:'translateX(-50%)',background:'#fff',border:'1.5px solid #e5e7eb',borderRadius:12,padding:'10px 14px',minWidth:160,boxShadow:'0 8px 24px rgba(0,0,0,0.12),0 2px 6px rgba(0,0,0,0.06)',animation:'tooltipFadeIn 0.18s cubic-bezier(0.16,1,0.3,1) both',pointerEvents:'none',zIndex:10,textAlign:'left',whiteSpace:'nowrap' }}>
+                    <div style={{ fontFamily:'Inter,sans-serif',fontSize:12,fontWeight:600,color:'#111',marginBottom:3,letterSpacing:'-0.01em',overflow:'hidden',textOverflow:'ellipsis',maxWidth:180 }}>{artwork.title}</div>
+                    <div style={{ fontFamily:'Inter,sans-serif',fontSize:11,color:'#6b7280' }}>{artwork.artist}</div>
+                    <div style={{ fontFamily:'Inter,sans-serif',fontSize:10,color:'#9ca3af',marginTop:2 }}>{artwork.year}</div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -1660,24 +1707,6 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
           </button>
         </div>
 
-        {/* Hover tooltip (suppressed when a panel is open) */}
-        {hoveredArtwork && !selectedId && (() => {
-          const vw=window.innerWidth,vh=window.innerHeight,TW=220,TH=230;
-          let tx=tooltipPos.x+18,ty=tooltipPos.y-16;
-          if(tx+TW>vw-12)tx=tooltipPos.x-TW-12;
-          if(ty+TH>vh-12)ty=vh-TH-12;
-          if(ty<12)ty=12;
-          return (
-            <div className="tooltip" style={{ left:tx,top:ty }} key={hoveredArtwork.id}>
-              <img className="tooltip-img" src={hoveredArtwork.img} alt={hoveredArtwork.title}
-                onError={e=>{ e.target.src=`https://picsum.photos/seed/${hoveredArtwork.id+50}/220/120`; }} />
-              <div className="tooltip-title">{hoveredArtwork.title}</div>
-              <div className="tooltip-artist">{hoveredArtwork.artist}</div>
-              <div className="tooltip-meta">{hoveredArtwork.year} · {hoveredArtwork.medium}</div>
-              <div className="tooltip-tags">{hoveredArtwork.tags.slice(0,4).map(t=><span className="tooltip-tag" key={t}>{t}</span>)}</div>
-            </div>
-          );
-        })()}
       </div>
 
 
