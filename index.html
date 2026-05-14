@@ -14,6 +14,19 @@
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
     html, body { overscroll-behavior:none; }
     .info-modal::-webkit-scrollbar { display:none; }
+
+    /* ── Info modal base (desktop) ── */
+    .info-backdrop { position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.45); }
+    .info-modal { position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:401;width:min(1100px,94vw);max-height:88vh;background:#fff;border-radius:20px;border:1.5px solid #d1d5dc;box-shadow:0 25px 50px -12px rgba(0,0,0,0.22);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;scrollbar-width:none;-ms-overflow-style:none; }
+    .info-topbar { position:sticky;top:0;z-index:10;background:#fff;display:flex;align-items:center;justify-content:flex-end;padding:14px 16px 0;border-radius:20px 20px 0 0; }
+    .info-title-mobile { display:none; }
+    .info-title-desktop { font-family:'Inter',sans-serif;font-weight:500;font-size:22px;color:#111;margin-bottom:12px;letter-spacing:-0.02em; }
+    .info-desc-section { padding:24px 56px 32px;border-bottom:1px solid #f0f0f0; }
+    .info-close-btn { display:inline-flex;align-items:center;gap:4px;background:#fff;border:1.5px solid #d1d5dc;border-radius:999px;padding:7px 14px 7px 11px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;color:#858585;transition:background 0.15s; }
+    .info-cards-mobile { display:none; }
+    .info-card { border:1.5px solid #e5e7eb;border-radius:14px;padding:16px 18px; }
+    .info-card strong { font-family:'Inter',sans-serif;font-size:15px;font-weight:600;color:#111;display:block;margin-bottom:6px; }
+    .info-card p { font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;color:#6b7280;margin:0; }
     body { font-family:'Inter',sans-serif; background:#111; overflow:hidden; -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 
     @keyframes blob1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(60px,-40px) scale(1.12)} 66%{transform:translate(-30px,50px) scale(0.92)} }
@@ -183,14 +196,45 @@
       .find-btn { margin-top:30px; width:min(240px,80vw); height:54px; justify-content:center; font-size:17px; padding:0 24px; touch-action:manipulation; }
 
       .screen-enter { min-height:100svh; }
-      .screen-enter > header { height:calc(116px + env(safe-area-inset-top)) !important; padding:calc(env(safe-area-inset-top) + 14px) 14px 12px !important; align-items:flex-end !important; justify-content:center !important; gap:10px !important; }
-      .screen-enter > header > button:first-child { left:14px !important; top:calc(env(safe-area-inset-top) + 14px) !important; width:42px !important; height:42px !important; padding:0 !important; border-radius:999px !important; transform:none !important; font-size:0 !important; justify-content:center !important; background:#fff !important; }
-      .screen-enter > header > button:first-child svg { width:18px; height:18px; }
-      .screen-enter > header > div { width:100% !important; max-width:none !important; align-self:flex-end !important; }
-      .screen-enter > header > button:last-child { right:14px !important; top:calc(env(safe-area-inset-top) + 14px) !important; width:42px !important; height:42px !important; padding:0 !important; border-radius:999px !important; transform:none !important; font-size:0 !important; justify-content:center !important; }
-      .screen-enter > header > button:last-child svg { width:18px; height:18px; }
-      .search-input { width:100% !important; height:48px; padding:12px 14px 12px 44px; font-size:14px; border-radius:999px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
-      .search-input::placeholder { color:rgba(10,10,10,0.42); }
+      .screen-enter > header {
+        height:calc(64px + env(safe-area-inset-top)) !important;
+        padding:calc(env(safe-area-inset-top) + 10px) 14px 10px !important;
+        display:flex !important; flex-direction:row !important;
+        align-items:center !important; justify-content:space-between !important;
+        gap:10px !important; position:relative !important;
+      }
+      /* Back button — circular pill */
+      .screen-enter > header > button:first-child {
+        position:static !important; transform:none !important;
+        width:42px !important; height:42px !important; min-width:42px !important;
+        padding:0 !important; border-radius:999px !important;
+        border:1.5px solid #e5e7eb !important; background:#fff !important;
+        display:flex !important; align-items:center !important; justify-content:center !important;
+        font-size:0 !important; flex-shrink:0 !important;
+      }
+      .screen-enter > header > button:first-child svg { width:18px !important; height:18px !important; }
+      /* Search bar — expands to fill space */
+      .screen-enter > header > div {
+        flex:1 !important; min-width:0 !important;
+        position:relative !important; display:flex !important; align-items:center !important;
+      }
+      .search-input {
+        width:100% !important; height:44px !important;
+        padding:10px 16px 10px 40px !important; font-size:15px !important;
+        border-radius:999px !important; border:1.5px solid #e5e7eb !important;
+        box-shadow:none !important;
+      }
+      .search-input::placeholder { color:rgba(10,10,10,0.38); }
+      /* Info button — circular pill */
+      .screen-enter > header > button:last-child {
+        position:static !important; transform:none !important;
+        width:42px !important; height:42px !important; min-width:42px !important;
+        padding:0 !important; border-radius:999px !important;
+        border:1.5px solid #e5e7eb !important; background:#fff !important;
+        display:flex !important; align-items:center !important; justify-content:center !important;
+        font-size:0 !important; flex-shrink:0 !important;
+      }
+      .screen-enter > header > button:last-child svg { width:18px !important; height:18px !important; }
 
       .canvas-root { touch-action:none; cursor:grab; }
       .axis-label { font-size:11px; line-height:16px; padding:5px 9px; border-radius:999px; background:rgba(255,255,255,0.5); }
@@ -226,7 +270,15 @@
       .similar-card { width:148px; border-radius:10px; }
       .similar-card img { width:148px; height:88px; }
 
-      div[style*="z-index: 401"], div[style*="zIndex:401"] { width:100vw !important; height:100svh !important; border-radius:0 !important; }
+      .info-modal { top:auto !important; left:0 !important; right:0 !important; bottom:0 !important; transform:none !important; width:100% !important; max-height:88vh !important; border-radius:20px 20px 0 0 !important; border-left:none !important; border-right:none !important; border-bottom:none !important; animation:mobileSheetIn 0.28s cubic-bezier(0.22,1,0.36,1) both; }
+      .info-modal::before { content:""; position:absolute; top:8px; left:50%; width:42px; height:4px; border-radius:999px; background:#d1d5dc; transform:translateX(-50%); z-index:3; }
+      .info-topbar { padding:20px 20px 12px !important; justify-content:space-between !important; }
+      .info-title-mobile { display:block !important; font-family:'Inter',sans-serif; font-size:20px; font-weight:600; color:#111; line-height:1.3; flex:1; margin-right:12px; margin-bottom:0; }
+      .info-title-desktop { display:none !important; }
+      .info-desc-section { padding:16px 20px 20px !important; }
+      .info-close-btn { width:38px !important; height:38px !important; padding:0 !important; justify-content:center !important; border-radius:999px !important; flex-shrink:0; }
+      .info-close-label { display:none !important; }
+      .info-cards-mobile { display:flex !important; flex-direction:column; gap:12px; padding:16px 20px 40px; }
     }
 
     @keyframes mobileSheetIn {
@@ -1641,19 +1693,20 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
       {/* Info modal */}
       {showInfo && (
         <>
-          <div style={{ position:'fixed',inset:0,zIndex:400,background:'rgba(0,0,0,0.45)' }} onClick={()=>setShowInfo(false)} />
-          <div className="info-modal" style={{ position:'fixed',left:'50%',top:'50%',transform:'translate(-50%,-50%)',zIndex:401,width:'min(1100px,94vw)',maxHeight:'88vh',background:'#fff',borderRadius:20,border:'1.5px solid #d1d5dc',boxShadow:'0 25px 50px -12px rgba(0,0,0,0.22)',overflowY:'auto',overflowX:'hidden',display:'flex',flexDirection:'column',scrollbarWidth:'none',msOverflowStyle:'none' }}>
-            {/* Sticky close bar */}
-            <div style={{ position:'sticky',top:0,zIndex:10,background:'#fff',display:'flex',justifyContent:'flex-end',padding:'14px 16px 0',borderRadius:'20px 20px 0 0' }}>
-              <button onClick={()=>setShowInfo(false)} style={{ display:'inline-flex',alignItems:'center',gap:4,background:'#fff',border:'1.5px solid #d1d5dc',borderRadius:999,padding:'7px 14px 7px 11px',cursor:'pointer',fontFamily:'Inter,sans-serif',fontSize:13,color:'#858585',transition:'background 0.15s' }}
+          <div className="info-backdrop" onClick={()=>setShowInfo(false)} />
+          <div className="info-modal">
+            {/* Sticky top bar — desktop: close button only; mobile: title + close */}
+            <div className="info-topbar">
+              <h2 className="info-title-mobile">What am I looking at?</h2>
+              <button className="info-close-btn" onClick={()=>setShowInfo(false)}
                 onMouseEnter={e=>e.currentTarget.style.background='#f9fafb'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 1.5l9 9M10.5 1.5l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                Close
+                <span className="info-close-label">Close</span>
               </button>
             </div>
             {/* Description header */}
-            <div style={{ padding:'24px 56px 32px',borderBottom:'1px solid #f0f0f0' }}>
-              <h2 style={{ fontFamily:'Inter,sans-serif',fontWeight:500,fontSize:22,color:'#111',marginBottom:12,letterSpacing:'-0.02em' }}>What am I looking at?</h2>
+            <div className="info-desc-section">
+              <h2 className="info-title-desktop">What am I looking at?</h2>
               <p style={{ fontFamily:'Inter,sans-serif',fontWeight:400,fontSize:14,lineHeight:1.7,color:'#6b7280',maxWidth:680 }}>
                 This canvas maps artworks along two dimensions. The horizontal axis shows how works were retrieved: name-based matches on the left, vibe-based matches on the right. The vertical axis reflects familiarity, with mainstream iconic works at the top and more niche, lesser-known works at the bottom.
               </p>
@@ -1673,6 +1726,17 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
             </div>
             {/* Matrix image */}
             <img src="quadrant-diagram.png" alt="Quadrant diagram" style={{ display:'block',width:'100%',height:'auto',padding:'40px 0 48px' }} />
+            {/* Mobile-only info cards */}
+            <div className="info-cards-mobile">
+              <div className="info-card">
+                <strong>By Name to By Vibe</strong>
+                <p>Left-side results are direct title or name matches. Right-side results are visual matches based on color, atmosphere, material, and mood.</p>
+              </div>
+              <div className="info-card">
+                <strong>Mainstream to Niche</strong>
+                <p>Top results lean recognizable and iconic. Lower results are less obvious works that would usually be buried by popularity-based ranking.</p>
+              </div>
+            </div>
           </div>
         </>
       )}
