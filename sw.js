@@ -1,4 +1,4 @@
-const CACHE_NAME = "nga-explorer-v14";
+const CACHE_NAME = "nga-explorer-v15";
 const SHELL = ["/", "/index.html", "/manifest.webmanifest", "/icon.svg"];
 
 self.addEventListener("install", event => {
