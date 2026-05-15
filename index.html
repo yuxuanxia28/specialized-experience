@@ -1450,7 +1450,6 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
   const [hoveredId,setHoveredId]     = useState(null);
   const [selectedId,setSelectedId]   = useState(null);
   const [repOffsets,setRepOffsets]   = useState({});
-  const [canvasBg,setCanvasBg]       = useState('#ffffff');
   const [searchQuery,setSearchQuery] = useState(initialQuery||'');
   const [pan,setPan]                 = useState({ x:0,y:0 });
   const [isDragging,setIsDragging]   = useState(false);
@@ -1587,31 +1586,6 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
     return()=>{if(rafRef.current)cancelAnimationFrame(rafRef.current);};
   },[hoveredId,visibleSet,presetById]);
 
-  // ── Dominant colour from selected painting ────────────────────────────────
-  useEffect(()=>{
-    if(!selectedId){ setCanvasBg('#ffffff'); return; }
-    const artwork=ARTWORKS.find(a=>a.id===selectedId);
-    if(!artwork){ setCanvasBg('#ffffff'); return; }
-    const img=new Image();
-    img.crossOrigin='anonymous';
-    img.onload=()=>{
-      try{
-        const cv=document.createElement('canvas');
-        cv.width=cv.height=10;
-        const ctx=cv.getContext('2d');
-        ctx.drawImage(img,0,0,10,10);
-        const d=ctx.getImageData(0,0,10,10).data;
-        let r=0,g=0,b=0,n=0;
-        for(let i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2];n++;}
-        r=Math.round(r/n);g=Math.round(g/n);b=Math.round(b/n);
-        const mix=(c)=>Math.round(255*0.93+c*0.07);
-        setCanvasBg(`rgb(${mix(r)},${mix(g)},${mix(b)})`);
-      }catch(e){ setCanvasBg('#ffffff'); }
-    };
-    img.onerror=()=>setCanvasBg('#ffffff');
-    img.src=artwork.img;
-  },[selectedId]);
-
   zoomRef.current = zoom;
   const rankById = Object.fromEntries(scoredArtworks.map((a,i)=>[a.id,i]));
   const selectedArtwork = ARTWORKS.find(a=>a.id===selectedId)||null;
@@ -1642,7 +1616,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
 
 
       {/* Canvas */}
-      <div ref={canvasRef} className="canvas-root" style={{ flex:1,cursor:isDragging?'grabbing':'grab',userSelect:'none',background:canvasBg,transition:'background 1s ease' }}
+      <div ref={canvasRef} className="canvas-root" style={{ flex:1,cursor:isDragging?'grabbing':'grab',userSelect:'none' }}
         onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
         onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd}>
 
