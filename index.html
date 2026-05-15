@@ -1450,7 +1450,7 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
   const [hoveredId,setHoveredId]     = useState(null);
   const [selectedId,setSelectedId]   = useState(null);
   const [repOffsets,setRepOffsets]   = useState({});
-  const [canvasBg,setCanvasBg]       = useState('transparent');
+  const [canvasBg,setCanvasBg]       = useState('#ffffff');
   const [searchQuery,setSearchQuery] = useState(initialQuery||'');
   const [pan,setPan]                 = useState({ x:0,y:0 });
   const [isDragging,setIsDragging]   = useState(false);
@@ -1589,9 +1589,9 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
 
   // ── Dominant colour from selected painting ────────────────────────────────
   useEffect(()=>{
-    if(!selectedId){ setCanvasBg('transparent'); return; }
+    if(!selectedId){ setCanvasBg('#ffffff'); return; }
     const artwork=ARTWORKS.find(a=>a.id===selectedId);
-    if(!artwork){ setCanvasBg('transparent'); return; }
+    if(!artwork){ setCanvasBg('#ffffff'); return; }
     const img=new Image();
     img.crossOrigin='anonymous';
     img.onload=()=>{
@@ -1604,10 +1604,11 @@ function ExploratoryCanvas({ initialQuery, initialTemperature, onBack }) {
         let r=0,g=0,b=0,n=0;
         for(let i=0;i<d.length;i+=4){r+=d[i];g+=d[i+1];b+=d[i+2];n++;}
         r=Math.round(r/n);g=Math.round(g/n);b=Math.round(b/n);
-        setCanvasBg(`rgba(${r},${g},${b},0.13)`);
-      }catch(e){ setCanvasBg('transparent'); }
+        const mix=(c)=>Math.round(255*0.93+c*0.07);
+        setCanvasBg(`rgb(${mix(r)},${mix(g)},${mix(b)})`);
+      }catch(e){ setCanvasBg('#ffffff'); }
     };
-    img.onerror=()=>setCanvasBg('transparent');
+    img.onerror=()=>setCanvasBg('#ffffff');
     img.src=artwork.img;
   },[selectedId]);
 
